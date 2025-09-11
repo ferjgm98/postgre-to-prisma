@@ -169,14 +169,6 @@
   min-width: 50px;
 }
 
-.copy-button {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.editor-panel:hover .copy-button {
-  opacity: 1;
-}
 
 .syntax-highlighted {
   font-family: var(--font-mono);

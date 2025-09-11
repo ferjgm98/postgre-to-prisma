@@ -1,78 +1,90 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SQLParser } from "@/services/sql-parser";
 import { PrismaGenerator } from "@/services/prisma-generator";
-import { Database, Layers, Copy, Upload, Download, Settings, HelpCircle, CheckCircle2 } from "lucide-react";
+import {
+  Database,
+  Layers,
+  Copy,
+  Upload,
+  Download,
+  Settings,
+  HelpCircle,
+  CheckCircle2,
+} from "lucide-react";
 import Editor from "@monaco-editor/react";
 
 // Register Prisma language with Monaco Editor
 const registerPrismaLanguage = () => {
-  if (typeof window !== 'undefined' && (window as any).monaco) {
+  if (typeof window !== "undefined" && (window as any).monaco) {
     const monaco = (window as any).monaco;
-    
+
     // Register the language
-    monaco.languages.register({ id: 'prisma' });
-    
+    monaco.languages.register({ id: "prisma" });
+
     // Define syntax highlighting tokens
-    monaco.languages.setMonarchTokensProvider('prisma', {
+    monaco.languages.setMonarchTokensProvider("prisma", {
       tokenizer: {
         root: [
           // Keywords
-          [/\b(model|enum|datasource|generator|type)\b/, 'keyword'],
-          
+          [/\b(model|enum|datasource|generator|type)\b/, "keyword"],
+
           // Data types
-          [/\b(String|Int|BigInt|Boolean|DateTime|Float|Decimal|Json|Bytes)\b/, 'type'],
-          
+          [
+            /\b(String|Int|BigInt|Boolean|DateTime|Float|Decimal|Json|Bytes)\b/,
+            "type",
+          ],
+
           // Decorators/Attributes
-          [/@@?\w+(\([^)]*\))?/, 'annotation'],
-          
+          [/@@?\w+(\([^)]*\))?/, "annotation"],
+
           // Strings
-          [/"([^"\\]|\\.)*$/, 'string.invalid'],
-          [/"([^"\\]|\\.)*"/, 'string'],
-          [/'([^'\\]|\\.)*$/, 'string.invalid'],
-          [/'([^'\\]|\\.)*'/, 'string'],
-          
+          [/"([^"\\]|\\.)*$/, "string.invalid"],
+          [/"([^"\\]|\\.)*"/, "string"],
+          [/'([^'\\]|\\.)*$/, "string.invalid"],
+          [/'([^'\\]|\\.)*'/, "string"],
+
           // Comments
-          [/\/\/.*$/, 'comment'],
-          [/\/\*/, 'comment', '@comment'],
-          
+          [/\/\/.*$/, "comment"],
+          [/\/\*/, "comment", "@comment"],
+
           // Numbers
-          [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
-          [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-          [/\d+/, 'number'],
-          
+          [/\d*\.\d+([eE][\-+]?\d+)?/, "number.float"],
+          [/0[xX][0-9a-fA-F]+/, "number.hex"],
+          [/\d+/, "number"],
+
           // Identifiers
-          [/[a-zA-Z_]\w*/, 'identifier'],
-          
+          [/[a-zA-Z_]\w*/, "identifier"],
+
           // Whitespace and others
-          [/[ \t\r\n]+/, 'white'],
-          [/[{}()\[\]]/, '@brackets'],
-          [/[;,.]/, 'delimiter'],
+          [/[ \t\r\n]+/, "white"],
+          [/[{}()\[\]]/, "@brackets"],
+          [/[;,.]/, "delimiter"],
         ],
         comment: [
-          [/[^\/*]+/, 'comment'],
-          [/\/\*/, 'comment', '@push'],
-          [/\*\//, 'comment', '@pop'],
-          [/[\/*]/, 'comment']
-        ]
-      }
+          [/[^\/*]+/, "comment"],
+          [/\/\*/, "comment", "@push"],
+          [/\*\//, "comment", "@pop"],
+          [/[\/*]/, "comment"],
+        ],
+      },
     });
-    
+
     // Define custom theme for Prisma
-    monaco.editor.defineTheme('prisma-theme', {
-      base: 'vs-dark',
+    monaco.editor.defineTheme("prisma-theme", {
+      base: "vs-dark",
       inherit: true,
       rules: [
-        { token: 'keyword', foreground: 'C586C0' },
-        { token: 'type', foreground: '4EC9B0' },
-        { token: 'annotation', foreground: 'DCDCAA' },
-        { token: 'string', foreground: 'CE9178' },
-        { token: 'comment', foreground: '6A9955' },
-        { token: 'number', foreground: 'B5CEA8' },
-        { token: 'identifier', foreground: '9CDCFE' }
+        { token: "keyword", foreground: "C586C0" },
+        { token: "type", foreground: "4EC9B0" },
+        { token: "annotation", foreground: "DCDCAA" },
+        { token: "string", foreground: "CE9178" },
+        { token: "comment", foreground: "6A9955" },
+        { token: "number", foreground: "B5CEA8" },
+        { token: "identifier", foreground: "9CDCFE" },
       ],
-      colors: {}
+      colors: {},
     });
   }
 };
@@ -119,7 +131,7 @@ const defaultPrismaContent = `// Generated Prisma schema will appear here
 //   createdAt DateTime @default(now()) @map("created_at")
 //   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 //   posts     Post[]
-//   
+//
 //   @@map("users")
 // }
 //
@@ -131,75 +143,80 @@ const defaultPrismaContent = `// Generated Prisma schema will appear here
 //   authorId  Int      @map("author_id")
 //   createdAt DateTime @default(now()) @map("created_at")
 //   author    User     @relation(fields: [authorId], references: [id])
-//   
+//
 //   @@map("posts")
 // }`;
 
 export default function Converter() {
   const [sqlInput, setSqlInput] = useState(defaultSQL);
   const [prismaOutput, setPrismaOutput] = useState("");
-  const [conversionStatus, setConversionStatus] = useState<"ready" | "converting" | "error">("ready");
+  const [conversionStatus, setConversionStatus] = useState<
+    "ready" | "converting" | "error"
+  >("ready");
   const [tablesConverted, setTablesConverted] = useState(0);
   const [sqlCopied, setSqlCopied] = useState(false);
   const [prismaCopied, setPrismaCopied] = useState(false);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize Monaco with Prisma language support
   const handleEditorWillMount = (_monaco: any) => {
     registerPrismaLanguage();
   };
 
-
-  const convertSQLToPrisma = useCallback((sql: string) => {
-    if (!sql.trim()) {
-      setPrismaOutput("");
-      setTablesConverted(0);
-      setConversionStatus("ready");
-      return;
-    }
-
-    try {
-      setConversionStatus("converting");
-      
-      // Parse SQL and generate Prisma schema
-      const parseResult = SQLParser.parseSQL(sql);
-      
-      if (parseResult.tables.length === 0 && parseResult.enums.length === 0) {
-        setConversionStatus("error");
-        toast({
-          title: "Conversion Error",
-          description: "No valid table definitions or enums found in SQL",
-          variant: "destructive",
-        });
+  const convertSQLToPrisma = useCallback(
+    (sql: string) => {
+      if (!sql.trim()) {
+        setPrismaOutput("");
+        setTablesConverted(0);
+        setConversionStatus("ready");
         return;
       }
 
-      const prismaSchema = PrismaGenerator.generatePrismaSchema(parseResult);
-      
-      setPrismaOutput(prismaSchema);
-      setConversionStatus("ready");
-      
-      // Count number of models and enums in the output
-      const modelCount = (prismaSchema.match(/^model\s+\w+/gm) || []).length;
-      const enumCount = (prismaSchema.match(/^enum\s+\w+/gm) || []).length;
-      setTablesConverted(modelCount + enumCount);
-      
-    } catch (error) {
-      console.error("Conversion error:", error);
-      setConversionStatus("error");
-      toast({
-        title: "Conversion Error",
-        description: "An error occurred during conversion. Please check your SQL syntax.",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
+      try {
+        setConversionStatus("converting");
+
+        // Parse SQL and generate Prisma schema
+        const parseResult = SQLParser.parseSQL(sql);
+
+        if (parseResult.tables.length === 0 && parseResult.enums.length === 0) {
+          setConversionStatus("error");
+          toast({
+            title: "Conversion Error",
+            description: "No valid table definitions or enums found in SQL",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const prismaSchema = PrismaGenerator.generatePrismaSchema(parseResult);
+
+        setPrismaOutput(prismaSchema);
+        setConversionStatus("ready");
+
+        // Count number of models and enums in the output
+        const modelCount = (prismaSchema.match(/^model\s+\w+/gm) || []).length;
+        const enumCount = (prismaSchema.match(/^enum\s+\w+/gm) || []).length;
+        setTablesConverted(modelCount + enumCount);
+      } catch (error) {
+        console.error("Conversion error:", error);
+        setConversionStatus("error");
+        toast({
+          title: "Conversion Error",
+          description:
+            "An error occurred during conversion. Please check your SQL syntax.",
+          variant: "destructive",
+        });
+      }
+    },
+    [toast],
+  );
 
   const debouncedConvert = useCallback(
     debounce((sql: string) => {
       convertSQLToPrisma(sql);
     }, 300), // Reduced debounce time since conversion is now instant
-    [convertSQLToPrisma]
+    [convertSQLToPrisma],
   );
 
   useEffect(() => {
@@ -242,11 +259,99 @@ export default function Converter() {
     }
   };
 
+  const handleImportSQL = () => {
+    fileInputRef.current?.click();
+  };
 
+  const handleExportSchema = () => {
+    if (!prismaOutput) return;
 
+    try {
+      // Create a blob with the Prisma schema content
+      const blob = new Blob([prismaOutput], { type: 'text/plain' });
+      
+      // Generate filename with timestamp
+      const now = new Date();
+      const timestamp = now.toISOString()
+        .replace(/[-:]/g, '')
+        .replace(/\..+/, '')
+        .replace('T', '_');
+      const filename = `schema_${timestamp}.prisma`;
+      
+      // Create download link and trigger download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Schema Exported",
+        description: `Successfully exported ${filename}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export the schema file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.sql')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select a .sql file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (content) {
+        setSqlInput(content);
+        toast({
+          title: "File Imported",
+          description: `Successfully imported ${file.name}`,
+        });
+      }
+    };
+
+    reader.onerror = () => {
+      toast({
+        title: "Import Failed",
+        description: "Failed to read the file",
+        variant: "destructive",
+      });
+    };
+
+    reader.readAsText(file);
+    
+    // Reset the input so the same file can be selected again
+    event.target.value = '';
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".sql"
+        style={{ display: 'none' }}
+      />
       {/* Header */}
       <header className="bg-card border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
@@ -255,24 +360,29 @@ export default function Converter() {
               <Database className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">SQL to Prisma Converter</h1>
-              <p className="text-sm text-muted-foreground">Transform SQL schemas into Prisma models in real-time</p>
+              <h1 className="text-xl font-semibold text-foreground">
+                SQL to Prisma Converter
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Transform SQL schemas into Prisma models in real-time
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               size="sm"
               data-testid="button-import"
+              onClick={handleImportSQL}
               className="flex items-center space-x-2"
             >
               <Upload className="h-3 w-3" />
               <span>Import SQL</span>
             </Button>
-            <Button 
+            <Button
               size="sm"
               data-testid="button-export"
-              onClick={handleCopyPrisma}
+              onClick={handleExportSchema}
               disabled={!prismaOutput}
               className="flex items-center space-x-2"
             >
@@ -297,13 +407,17 @@ export default function Converter() {
               size="sm"
               data-testid="button-copy-sql"
               onClick={handleCopySQL}
-              className="copy-button px-2 py-1 text-xs bg-accent hover:bg-accent/80 transition-opacity flex items-center space-x-1"
+              className="px-2 py-1 text-xs flex items-center space-x-1"
             >
-              {sqlCopied ? <CheckCircle2 className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-              <span>{sqlCopied ? 'Copied' : 'Copy'}</span>
+              {sqlCopied ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
+              <span>{sqlCopied ? "Copied" : "Copy"}</span>
             </Button>
           </div>
-          
+
           <div className="editor-content">
             <Editor
               height="100%"
@@ -336,7 +450,7 @@ export default function Converter() {
                 lineDecorationsWidth: 10,
                 lineNumbersMinChars: 3,
                 renderLineHighlight: "all",
-                renderFinalNewline: "on"
+                renderFinalNewline: "on",
               }}
             />
           </div>
@@ -355,18 +469,27 @@ export default function Converter() {
               data-testid="button-copy-prisma"
               onClick={handleCopyPrisma}
               disabled={!prismaOutput}
-              className="copy-button px-2 py-1 text-xs bg-accent hover:bg-accent/80 transition-opacity flex items-center space-x-1"
+              className="px-2 py-1 text-xs flex items-center space-x-1"
             >
-              {prismaCopied ? <CheckCircle2 className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-              <span>{prismaCopied ? 'Copied' : 'Copy'}</span>
+              {prismaCopied ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
+              <span>{prismaCopied ? "Copied" : "Copy"}</span>
             </Button>
           </div>
-          
+
           <div className="editor-content">
             <Editor
               height="100%"
               defaultLanguage="prisma"
-              value={prismaOutput || (conversionStatus === "converting" ? "// Converting SQL to Prisma..." : defaultPrismaContent)}
+              value={
+                prismaOutput ||
+                (conversionStatus === "converting"
+                  ? "// Converting SQL to Prisma..."
+                  : defaultPrismaContent)
+              }
               beforeMount={handleEditorWillMount}
               theme="vs-dark"
               options={{
@@ -395,7 +518,7 @@ export default function Converter() {
                 overviewRulerBorder: false,
                 hideCursorInOverviewRuler: true,
                 renderLineHighlight: "all",
-                renderFinalNewline: "on"
+                renderFinalNewline: "on",
               }}
             />
           </div>
@@ -406,23 +529,38 @@ export default function Converter() {
       <div className="bg-muted border-t border-border px-4 py-2 flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-1">
-            <div className={`w-2 h-2 rounded-full ${
-              conversionStatus === "ready" ? "bg-chart-2" :
-              conversionStatus === "converting" ? "bg-chart-3 animate-pulse" :
-              "bg-destructive"
-            }`} />
+            <div
+              className={`w-2 h-2 rounded-full ${
+                conversionStatus === "ready"
+                  ? "bg-chart-2"
+                  : conversionStatus === "converting"
+                    ? "bg-chart-3 animate-pulse"
+                    : "bg-destructive"
+              }`}
+            />
             <span data-testid="text-status">
-              {conversionStatus === "ready" ? "Ready" :
-               conversionStatus === "converting" ? "Converting..." :
-               "Error"}
+              {conversionStatus === "ready"
+                ? "Ready"
+                : conversionStatus === "converting"
+                  ? "Converting..."
+                  : "Error"}
             </span>
           </div>
-          <div data-testid="text-tables-converted">{tablesConverted} items converted</div>
+          <div data-testid="text-tables-converted">
+            {tablesConverted} items converted
+          </div>
           <div>PostgreSQL dialect</div>
         </div>
         <div className="flex items-center space-x-4">
-          <div>Last converted: {conversionStatus === "converting" ? "converting..." : "now"}</div>
-          <Button variant="ghost" size="sm" className="h-auto p-0 hover:text-foreground transition-colors">
+          <div>
+            Last converted:{" "}
+            {conversionStatus === "converting" ? "converting..." : "now"}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto p-0 hover:text-foreground transition-colors"
+          >
             <Settings className="h-3 w-3" />
           </Button>
         </div>
@@ -443,7 +581,7 @@ export default function Converter() {
 // Debounce utility function
 function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
