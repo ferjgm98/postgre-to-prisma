@@ -220,7 +220,7 @@ datasource db {
     return baseName;
   }
 
-  private static generateUniqueFieldName(sourceTable: string, targetTable: string, columns: string[], fieldNameCounters: Map<string, Map<string, number>>, isBackRelation: boolean): string {
+  private static generateUniqueFieldName(sourceTable: string, targetTable: string, columns: string[], _fieldNameCounters: Map<string, Map<string, number>>, isBackRelation: boolean): string {
     const fkColumn = columns[0]; // Primary FK column for naming
 
     if (isBackRelation) {

@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { SQLParser } from "@/services/sql-parser";
 import { PrismaGenerator } from "@/services/prisma-generator";
@@ -9,7 +16,6 @@ import {
   Copy,
   Upload,
   Download,
-  Settings,
   HelpCircle,
   CheckCircle2,
 } from "lucide-react";
@@ -156,6 +162,7 @@ export default function Converter() {
   const [tablesConverted, setTablesConverted] = useState(0);
   const [sqlCopied, setSqlCopied] = useState(false);
   const [prismaCopied, setPrismaCopied] = useState(false);
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sqlEditorRef = useRef<any>(null);
@@ -174,18 +181,20 @@ export default function Converter() {
     const entityNames = new Set<string>();
     
     // Match CREATE TABLE statements
-    const createTableRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([`"]?)([a-zA-Z_][\w]*)\1/gi;
+    const createTableRegex =
+      /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([`"]?)([a-zA-Z_][\w]*)\1/gi;
     let match;
     while ((match = createTableRegex.exec(sql)) !== null) {
       entityNames.add(match[2].toLowerCase());
     }
     
     // Match CREATE TYPE ... AS ENUM statements
-    const createTypeRegex = /CREATE\s+TYPE\s+([`"]?)([a-zA-Z_][\w]*)\1\s+AS\s+ENUM/gi;
+    const createTypeRegex =
+      /CREATE\s+TYPE\s+([`"]?)([a-zA-Z_][\w]*)\1\s+AS\s+ENUM/gi;
     while ((match = createTypeRegex.exec(sql)) !== null) {
       entityNames.add(match[2].toLowerCase());
     }
-    
+
     return entityNames;
   };
 
@@ -200,9 +209,9 @@ export default function Converter() {
 
     // First try Monaco's built-in method
     const monacoWord = model.getWordAtPosition(position);
-    
+
     // If Monaco found a word with underscores, use it
-    if (monacoWord && monacoWord.word.includes('_')) {
+    if (monacoWord && monacoWord.word.includes("_")) {
       return monacoWord;
     }
 
@@ -210,16 +219,16 @@ export default function Converter() {
     // Look for quoted or unquoted SQL identifiers
     const identifierRegex = /(["`']?)([a-zA-Z_][\w]*)\1/g;
     let match;
-    
+
     while ((match = identifierRegex.exec(lineContent)) !== null) {
       const start = match.index + match[1].length; // After opening quote
       const end = start + match[2].length; // Before closing quote
-      
+
       if (offset >= start && offset < end) {
         return {
           word: match[2], // The identifier without quotes
           startColumn: start + 1, // Monaco uses 1-based columns
-          endColumn: end + 1
+          endColumn: end + 1,
         };
       }
     }
@@ -233,8 +242,8 @@ export default function Converter() {
     sqlEditorRef.current = editor;
     
     // Configure word pattern for SQL to include underscores
-    monaco.languages.setLanguageConfiguration('sql', {
-      wordPattern: /[a-zA-Z_][\w]*/
+    monaco.languages.setLanguageConfiguration("sql", {
+      wordPattern: /[a-zA-Z_][\w]*/,
     });
 
     // Handle mouse move for hover effects
@@ -247,33 +256,35 @@ export default function Converter() {
         }
         return;
       }
-      
+
       const position = e.target.position;
       if (position) {
         const word = getWordAtPosition(editor, position);
         if (word) {
           const selectedText = word.word.toLowerCase();
           const entityNames = getSQLEntitiesFromSQL(sqlInputRef.current);
-          
-          
+
           if (entityNames.has(selectedText)) {
             // Add hover decoration
-            const decorations = editor.deltaDecorations(currentDecorationsRef.current, [
-              {
-                range: {
-                  startLineNumber: position.lineNumber,
-                  startColumn: word.startColumn,
-                  endLineNumber: position.lineNumber,
-                  endColumn: word.endColumn
+            const decorations = editor.deltaDecorations(
+              currentDecorationsRef.current,
+              [
+                {
+                  range: {
+                    startLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endLineNumber: position.lineNumber,
+                    endColumn: word.endColumn,
+                  },
+                  options: {
+                    className: "table-hover-highlight",
+                    hoverMessage: {
+                      value: `${navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+click to navigate to ${sqlToPrismaName(selectedText)} model`,
+                    },
+                  },
                 },
-                options: {
-                  className: 'table-hover-highlight',
-                  hoverMessage: {
-                    value: `${navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+click to navigate to ${sqlToPrismaName(selectedText)} model`
-                  }
-                }
-              }
-            ]);
+              ],
+            );
             currentDecorationsRef.current = decorations;
           } else {
             // Clear decorations when hovering over non-table words
@@ -294,18 +305,16 @@ export default function Converter() {
 
     // Handle clicks with onMouseUp for better Monaco compatibility
     editor.onMouseUp((e: any) => {
-      
       if ((e.event.metaKey || e.event.ctrlKey) && e.target.position) {
         const word = getWordAtPosition(editor, e.target.position);
         if (word) {
           const selectedText = word.word.toLowerCase();
           const entityNames = getSQLEntitiesFromSQL(sqlInputRef.current);
-          
-          
+
           if (entityNames.has(selectedText)) {
             e.event.preventDefault();
             e.event.stopPropagation();
-            
+
             // Small delay to ensure the event is processed
             setTimeout(() => {
               navigateToPrismaModel(selectedText);
@@ -317,13 +326,12 @@ export default function Converter() {
   };
 
   // Handle Prisma editor mount
-  const handlePrismaEditorMount = (editor: any, monaco: any) => {
+  const handlePrismaEditorMount = (editor: any, _monaco: any) => {
     prismaEditorRef.current = editor;
   };
 
   const convertSQLToPrisma = useCallback(
     (sql: string) => {
-      
       if (!sql.trim()) {
         setPrismaOutput("");
         setTablesConverted(0);
@@ -356,7 +364,6 @@ export default function Converter() {
         const modelCount = (prismaSchema.match(/^model\s+\w+/gm) || []).length;
         const enumCount = (prismaSchema.match(/^enum\s+\w+/gm) || []).length;
         setTablesConverted(modelCount + enumCount);
-        
       } catch (error) {
         console.error("Conversion error:", error);
         setConversionStatus("error");
@@ -385,8 +392,7 @@ export default function Converter() {
   }, [sqlInput]);
 
   // Monitor prismaOutput changes for debugging
-  useEffect(() => {
-  }, [prismaOutput]);
+  useEffect(() => {}, [prismaOutput]);
 
   // Global modifier key tracking
   useEffect(() => {
@@ -401,18 +407,21 @@ export default function Converter() {
         isModifierPressedRef.current = false;
         // Clear decorations when modifier is released globally
         if (sqlEditorRef.current && currentDecorationsRef.current.length > 0) {
-          sqlEditorRef.current.deltaDecorations(currentDecorationsRef.current, []);
+          sqlEditorRef.current.deltaDecorations(
+            currentDecorationsRef.current,
+            [],
+          );
           currentDecorationsRef.current = [];
         }
       }
     };
 
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    window.addEventListener('keyup', handleGlobalKeyUp);
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    window.addEventListener("keyup", handleGlobalKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleGlobalKeyDown);
-      window.removeEventListener('keyup', handleGlobalKeyUp);
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+      window.removeEventListener("keyup", handleGlobalKeyUp);
     };
   }, []);
 
@@ -461,28 +470,29 @@ export default function Converter() {
 
     try {
       // Create a blob with the Prisma schema content
-      const blob = new Blob([prismaOutput], { type: 'text/plain' });
-      
+      const blob = new Blob([prismaOutput], { type: "text/plain" });
+
       // Generate filename with timestamp
       const now = new Date();
-      const timestamp = now.toISOString()
-        .replace(/[-:]/g, '')
-        .replace(/\..+/, '')
-        .replace('T', '_');
+      const timestamp = now
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\..+/, "")
+        .replace("T", "_");
       const filename = `schema_${timestamp}.prisma`;
-      
+
       // Create download link and trigger download
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Schema Exported",
         description: `Successfully exported ${filename}`,
@@ -500,7 +510,7 @@ export default function Converter() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith('.sql')) {
+    if (!file.name.endsWith(".sql")) {
       toast({
         title: "Invalid File Type",
         description: "Please select a .sql file",
@@ -530,47 +540,47 @@ export default function Converter() {
     };
 
     reader.readAsText(file);
-    
+
     // Reset the input so the same file can be selected again
-    event.target.value = '';
+    event.target.value = "";
   };
 
   // Convert SQL entity name to Prisma name (model or enum)
   const sqlToPrismaName = (sqlName: string): string => {
     // Remove quotes if present
-    const cleanName = sqlName.replace(/["`']/g, '');
-    
+    const cleanName = sqlName.replace(/["`']/g, "");
+
     // Convert snake_case to PascalCase
     let result = cleanName
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join('');
-    
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join("");
+
     // Check if this is likely an enum (contains common enum patterns or suffixes)
-    const isLikelyEnum = /(_status|_type|_state|_category|_level|_role|_kind)$/i.test(cleanName) || 
-                        /^(status|type|state|category|level|role|kind)/i.test(cleanName);
-    
+    const isLikelyEnum =
+      /(_status|_type|_state|_category|_level|_role|_kind)$/i.test(cleanName) ||
+      /^(status|type|state|category|level|role|kind)/i.test(cleanName);
+
     // Only singularize if it's likely a table (not an enum)
     if (!isLikelyEnum) {
       // Better singularization for tables
-      if (result.endsWith('ies')) {
-        result = result.slice(0, -3) + 'y'; // companies -> Company
-      } else if (result.endsWith('es') && !result.endsWith('ses')) {
+      if (result.endsWith("ies")) {
+        result = result.slice(0, -3) + "y"; // companies -> Company
+      } else if (result.endsWith("es") && !result.endsWith("ses")) {
         result = result.slice(0, -2); // boxes -> Box, but not buses -> Bu
-      } else if (result.endsWith('s') && !result.endsWith('ss')) {
+      } else if (result.endsWith("s") && !result.endsWith("ss")) {
         result = result.slice(0, -1); // users -> User, but not class -> Clas
       }
     }
-    
+
     return result;
   };
 
   // Navigate to corresponding Prisma model
   const navigateToPrismaModel = (sqlTableName: string) => {
-    
     if (!prismaEditorRef.current) {
       toast({
-        title: "Navigation Error", 
+        title: "Navigation Error",
         description: "Prisma editor not ready",
         variant: "destructive",
       });
@@ -580,7 +590,7 @@ export default function Converter() {
     // Get the actual content from the editor instead of using React state
     const prismaEditor = prismaEditorRef.current;
     const model = prismaEditor.getModel();
-    
+
     if (!model) {
       toast({
         title: "Navigation Error",
@@ -591,35 +601,35 @@ export default function Converter() {
     }
 
     const editorContent = model.getValue();
-    
+
     if (!editorContent || editorContent.trim().length === 0) {
       toast({
         title: "No Prisma Schema",
-        description: "Please wait for SQL to be converted to Prisma schema first",
+        description:
+          "Please wait for SQL to be converted to Prisma schema first",
         variant: "destructive",
       });
       return;
     }
 
     const modelName = sqlToPrismaName(sqlTableName);
-    
+
     try {
       // Focus the Prisma editor first
       prismaEditor.focus();
 
       // Try multiple search patterns to find the model or enum
       const searchPatterns = [
-        `model ${modelName}`,          // Try as a model first
-        `enum ${modelName}`,           // Try as an enum  
+        `model ${modelName}`, // Try as a model first
+        `enum ${modelName}`, // Try as an enum
         `model ${modelName.toLowerCase()}`,
         `enum ${modelName.toLowerCase()}`,
-        modelName,                     // Just the entity name
-        `${modelName} {`              // Entity name with opening brace
+        modelName, // Just the entity name
+        `${modelName} {`, // Entity name with opening brace
       ];
-      
+
       let matches: any[] = [];
-      let usedPattern = '';
-      
+
       for (const pattern of searchPatterns) {
         matches = model.findMatches(
           pattern,
@@ -627,38 +637,35 @@ export default function Converter() {
           false, // not case sensitive
           false, // not whole word
           null,
-          true // return all matches
+          true, // return all matches
         );
-        
+
         if (matches.length > 0) {
-          usedPattern = pattern;
           break;
         }
       }
-    
+
       if (matches.length > 0) {
         const match = matches[0];
         const startLine = match.range.startLineNumber;
-        
-        
+
         // Simple scroll to the line
         prismaEditor.revealLineInCenter(startLine);
-        
+
         // Set cursor position to the found line
         prismaEditor.setPosition({
           lineNumber: startLine,
-          column: 1
+          column: 1,
         });
-        
+
         // Simple selection of just the line
         prismaEditor.setSelection({
           startLineNumber: startLine,
           startColumn: 1,
           endLineNumber: startLine,
-          endColumn: model.getLineMaxColumn(startLine)
+          endColumn: model.getLineMaxColumn(startLine),
         });
 
-        
         toast({
           title: "Navigated to Model",
           description: `Found ${modelName} model in Prisma schema`,
@@ -672,7 +679,7 @@ export default function Converter() {
       }
       
     } catch (error) {
-      console.error('Error during navigation:', error);
+      console.error("Error during navigation:", error);
       toast({
         title: "Navigation Error",
         description: "An error occurred while navigating to the model",
@@ -689,7 +696,7 @@ export default function Converter() {
         ref={fileInputRef}
         onChange={handleFileChange}
         accept=".sql"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
       {/* Header */}
       <header className="bg-card border-b border-border px-6 py-4">
@@ -897,24 +904,166 @@ export default function Converter() {
             Last converted:{" "}
             {conversionStatus === "converting" ? "converting..." : "now"}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 hover:text-foreground transition-colors"
-          >
-            <Settings className="h-3 w-3" />
-          </Button>
         </div>
       </div>
 
       {/* Floating Help Button */}
-      <Button
-        data-testid="button-help"
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full shadow-lg hover:scale-105 transition-all"
-        size="sm"
-      >
-        <HelpCircle className="h-4 w-4" />
-      </Button>
+      <Dialog open={isHelpDialogOpen} onOpenChange={setIsHelpDialogOpen}>
+        <DialogTrigger asChild>
+          <Button
+            data-testid="button-help"
+            className="fixed bottom-6 right-6 w-12 h-12 rounded-full shadow-lg hover:scale-105 transition-all"
+            size="sm"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <HelpCircle className="h-5 w-5" />
+              <span>SQL to Prisma Converter - Help</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Overview */}
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Overview</h3>
+              <p className="text-muted-foreground">
+                This tool converts PostgreSQL SQL schemas to Prisma schema files
+                in real-time. Simply paste or type your SQL schema in the left
+                panel and see the converted Prisma schema on the right.
+              </p>
+            </div>
+
+            {/* Keyboard Shortcuts */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Keyboard Shortcuts</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <span>Navigate to Prisma model</span>
+                  <kbd className="px-2 py-1 text-xs bg-background border rounded">
+                    {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"} + Click
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <span>Copy SQL content</span>
+                  <kbd className="px-2 py-1 text-xs bg-background border rounded">
+                    Click Copy button
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <span>Copy Prisma schema</span>
+                  <kbd className="px-2 py-1 text-xs bg-background border rounded">
+                    Click Copy button
+                  </kbd>
+                </div>
+              </div>
+            </div>
+
+            {/* Features */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Features</h3>
+              <ul className="space-y-2 text-muted-foreground">
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-2 mt-1">•</span>
+                  <span>
+                    <strong>Real-time conversion:</strong> See changes instantly
+                    as you type
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-2 mt-1">•</span>
+                  <span>
+                    <strong>Smart navigation:</strong> Cmd/Ctrl+Click on table
+                    names in SQL to jump to corresponding Prisma models
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-2 mt-1">•</span>
+                  <span>
+                    <strong>Import/Export:</strong> Import SQL files and export
+                    generated Prisma schemas
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-2 mt-1">•</span>
+                  <span>
+                    <strong>Syntax highlighting:</strong> Full syntax
+                    highlighting for both SQL and Prisma
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-2 mt-1">•</span>
+                  <span>
+                    <strong>Relationship detection:</strong> Automatically
+                    generates bidirectional relationships
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Supported SQL Features */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">
+                Supported SQL Features
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <h4 className="font-medium mb-2">Tables & Columns</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• CREATE TABLE statements</li>
+                    <li>• Primary keys (SERIAL, UUID)</li>
+                    <li>• Foreign key constraints</li>
+                    <li>• NOT NULL constraints</li>
+                    <li>• DEFAULT values</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Data Types</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• INTEGER, SERIAL, BIGINT</li>
+                    <li>• VARCHAR, TEXT</li>
+                    <li>• BOOLEAN</li>
+                    <li>• TIMESTAMP, DATE</li>
+                    <li>• DECIMAL, NUMERIC</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Tips</h3>
+              <ul className="space-y-2 text-muted-foreground text-sm">
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-3 mt-1">💡</span>
+                  <span>
+                    Table names will be converted to PascalCase and singularized
+                    (e.g., <code className="bg-muted px-1 rounded">users</code>{" "}
+                    → <code className="bg-muted px-1 rounded">User</code>)
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-3 mt-1">💡</span>
+                  <span>
+                    Column names will be converted to camelCase (e.g.,{" "}
+                    <code className="bg-muted px-1 rounded">created_at</code> →{" "}
+                    <code className="bg-muted px-1 rounded">createdAt</code>)
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-chart-3 mt-1">💡</span>
+                  <span>
+                    Use the status bar to monitor conversion progress and see
+                    how many items were converted
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
