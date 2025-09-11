@@ -177,3 +177,32 @@
   white-space: pre;
   overflow-x: auto;
 }
+
+.temp-highlight {
+  background-color: var(--chart-1) !important;
+  opacity: 0.2;
+  animation: highlight-flash 2s ease-out;
+}
+
+@keyframes highlight-flash {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.2; }
+  100% { opacity: 0; }
+}
+
+.table-hover-highlight {
+  background-color: var(--chart-1) !important;
+  opacity: 0.3 !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  border-bottom: 2px solid var(--chart-1) !important;
+}
+
+/* Make sure Monaco decorations work */
+.monaco-editor .table-hover-highlight {
+  background-color: var(--chart-1) !important;
+  opacity: 0.3 !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  border-bottom: 2px solid var(--chart-1) !important;
+}

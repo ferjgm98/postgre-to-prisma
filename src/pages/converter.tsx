@@ -158,14 +158,172 @@ export default function Converter() {
   const [prismaCopied, setPrismaCopied] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sqlEditorRef = useRef<any>(null);
+  const prismaEditorRef = useRef<any>(null);
+  const isModifierPressedRef = useRef(false);
+  const sqlInputRef = useRef(sqlInput);
+  const currentDecorationsRef = useRef<string[]>([]);
 
   // Initialize Monaco with Prisma language support
   const handleEditorWillMount = (_monaco: any) => {
     registerPrismaLanguage();
   };
 
+  // Extract navigable entities (tables and enums) from SQL content
+  const getSQLEntitiesFromSQL = (sql: string): Set<string> => {
+    const entityNames = new Set<string>();
+    
+    // Match CREATE TABLE statements
+    const createTableRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([`"]?)([a-zA-Z_][\w]*)\1/gi;
+    let match;
+    while ((match = createTableRegex.exec(sql)) !== null) {
+      entityNames.add(match[2].toLowerCase());
+    }
+    
+    // Match CREATE TYPE ... AS ENUM statements
+    const createTypeRegex = /CREATE\s+TYPE\s+([`"]?)([a-zA-Z_][\w]*)\1\s+AS\s+ENUM/gi;
+    while ((match = createTypeRegex.exec(sql)) !== null) {
+      entityNames.add(match[2].toLowerCase());
+    }
+    
+    return entityNames;
+  };
+
+  // Enhanced word detection that handles quoted identifiers and underscores
+  const getWordAtPosition = (editor: any, position: any) => {
+    const model = editor.getModel();
+    if (!model) return null;
+
+    // Get the line content
+    const lineContent = model.getLineContent(position.lineNumber);
+    const offset = position.column - 1;
+
+    // First try Monaco's built-in method
+    const monacoWord = model.getWordAtPosition(position);
+    
+    // If Monaco found a word with underscores, use it
+    if (monacoWord && monacoWord.word.includes('_')) {
+      return monacoWord;
+    }
+
+    // Fallback: manually extract the full identifier including underscores
+    // Look for quoted or unquoted SQL identifiers
+    const identifierRegex = /(["`']?)([a-zA-Z_][\w]*)\1/g;
+    let match;
+    
+    while ((match = identifierRegex.exec(lineContent)) !== null) {
+      const start = match.index + match[1].length; // After opening quote
+      const end = start + match[2].length; // Before closing quote
+      
+      if (offset >= start && offset < end) {
+        return {
+          word: match[2], // The identifier without quotes
+          startColumn: start + 1, // Monaco uses 1-based columns
+          endColumn: end + 1
+        };
+      }
+    }
+
+    // If nothing else worked, return Monaco's result
+    return monacoWord;
+  };
+
+  // Handle SQL editor mount
+  const handleSqlEditorMount = (editor: any, monaco: any) => {
+    sqlEditorRef.current = editor;
+    
+    // Configure word pattern for SQL to include underscores
+    monaco.languages.setLanguageConfiguration('sql', {
+      wordPattern: /[a-zA-Z_][\w]*/
+    });
+
+    // Handle mouse move for hover effects
+    editor.onMouseMove((e: any) => {
+      if (!isModifierPressedRef.current) {
+        // Clear decorations if no modifier is pressed
+        if (currentDecorationsRef.current.length > 0) {
+          editor.deltaDecorations(currentDecorationsRef.current, []);
+          currentDecorationsRef.current = [];
+        }
+        return;
+      }
+      
+      const position = e.target.position;
+      if (position) {
+        const word = getWordAtPosition(editor, position);
+        if (word) {
+          const selectedText = word.word.toLowerCase();
+          const entityNames = getSQLEntitiesFromSQL(sqlInputRef.current);
+          
+          
+          if (entityNames.has(selectedText)) {
+            // Add hover decoration
+            const decorations = editor.deltaDecorations(currentDecorationsRef.current, [
+              {
+                range: {
+                  startLineNumber: position.lineNumber,
+                  startColumn: word.startColumn,
+                  endLineNumber: position.lineNumber,
+                  endColumn: word.endColumn
+                },
+                options: {
+                  className: 'table-hover-highlight',
+                  hoverMessage: {
+                    value: `${navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}+click to navigate to ${sqlToPrismaName(selectedText)} model`
+                  }
+                }
+              }
+            ]);
+            currentDecorationsRef.current = decorations;
+          } else {
+            // Clear decorations when hovering over non-table words
+            if (currentDecorationsRef.current.length > 0) {
+              editor.deltaDecorations(currentDecorationsRef.current, []);
+              currentDecorationsRef.current = [];
+            }
+          }
+        } else {
+          // Clear decorations when not hovering over a word
+          if (currentDecorationsRef.current.length > 0) {
+            editor.deltaDecorations(currentDecorationsRef.current, []);
+            currentDecorationsRef.current = [];
+          }
+        }
+      }
+    });
+
+    // Handle clicks with onMouseUp for better Monaco compatibility
+    editor.onMouseUp((e: any) => {
+      
+      if ((e.event.metaKey || e.event.ctrlKey) && e.target.position) {
+        const word = getWordAtPosition(editor, e.target.position);
+        if (word) {
+          const selectedText = word.word.toLowerCase();
+          const entityNames = getSQLEntitiesFromSQL(sqlInputRef.current);
+          
+          
+          if (entityNames.has(selectedText)) {
+            e.event.preventDefault();
+            e.event.stopPropagation();
+            
+            // Small delay to ensure the event is processed
+            setTimeout(() => {
+              navigateToPrismaModel(selectedText);
+            }, 50);
+          }
+        }
+      }
+    });
+  };
+
+  // Handle Prisma editor mount
+  const handlePrismaEditorMount = (editor: any, monaco: any) => {
+    prismaEditorRef.current = editor;
+  };
+
   const convertSQLToPrisma = useCallback(
     (sql: string) => {
+      
       if (!sql.trim()) {
         setPrismaOutput("");
         setTablesConverted(0);
@@ -198,6 +356,7 @@ export default function Converter() {
         const modelCount = (prismaSchema.match(/^model\s+\w+/gm) || []).length;
         const enumCount = (prismaSchema.match(/^enum\s+\w+/gm) || []).length;
         setTablesConverted(modelCount + enumCount);
+        
       } catch (error) {
         console.error("Conversion error:", error);
         setConversionStatus("error");
@@ -221,7 +380,41 @@ export default function Converter() {
 
   useEffect(() => {
     debouncedConvert(sqlInput);
+    // Keep ref in sync with state
+    sqlInputRef.current = sqlInput;
   }, [sqlInput]);
+
+  // Monitor prismaOutput changes for debugging
+  useEffect(() => {
+  }, [prismaOutput]);
+
+  // Global modifier key tracking
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        isModifierPressedRef.current = true;
+      }
+    };
+
+    const handleGlobalKeyUp = (e: KeyboardEvent) => {
+      if (!e.metaKey && !e.ctrlKey) {
+        isModifierPressedRef.current = false;
+        // Clear decorations when modifier is released globally
+        if (sqlEditorRef.current && currentDecorationsRef.current.length > 0) {
+          sqlEditorRef.current.deltaDecorations(currentDecorationsRef.current, []);
+          currentDecorationsRef.current = [];
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener('keyup', handleGlobalKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+      window.removeEventListener('keyup', handleGlobalKeyUp);
+    };
+  }, []);
 
   const handleCopySQL = async () => {
     try {
@@ -342,6 +535,152 @@ export default function Converter() {
     event.target.value = '';
   };
 
+  // Convert SQL entity name to Prisma name (model or enum)
+  const sqlToPrismaName = (sqlName: string): string => {
+    // Remove quotes if present
+    const cleanName = sqlName.replace(/["`']/g, '');
+    
+    // Convert snake_case to PascalCase
+    let result = cleanName
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join('');
+    
+    // Check if this is likely an enum (contains common enum patterns or suffixes)
+    const isLikelyEnum = /(_status|_type|_state|_category|_level|_role|_kind)$/i.test(cleanName) || 
+                        /^(status|type|state|category|level|role|kind)/i.test(cleanName);
+    
+    // Only singularize if it's likely a table (not an enum)
+    if (!isLikelyEnum) {
+      // Better singularization for tables
+      if (result.endsWith('ies')) {
+        result = result.slice(0, -3) + 'y'; // companies -> Company
+      } else if (result.endsWith('es') && !result.endsWith('ses')) {
+        result = result.slice(0, -2); // boxes -> Box, but not buses -> Bu
+      } else if (result.endsWith('s') && !result.endsWith('ss')) {
+        result = result.slice(0, -1); // users -> User, but not class -> Clas
+      }
+    }
+    
+    return result;
+  };
+
+  // Navigate to corresponding Prisma model
+  const navigateToPrismaModel = (sqlTableName: string) => {
+    
+    if (!prismaEditorRef.current) {
+      toast({
+        title: "Navigation Error", 
+        description: "Prisma editor not ready",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Get the actual content from the editor instead of using React state
+    const prismaEditor = prismaEditorRef.current;
+    const model = prismaEditor.getModel();
+    
+    if (!model) {
+      toast({
+        title: "Navigation Error",
+        description: "Prisma editor model not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const editorContent = model.getValue();
+    
+    if (!editorContent || editorContent.trim().length === 0) {
+      toast({
+        title: "No Prisma Schema",
+        description: "Please wait for SQL to be converted to Prisma schema first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const modelName = sqlToPrismaName(sqlTableName);
+    
+    try {
+      // Focus the Prisma editor first
+      prismaEditor.focus();
+
+      // Try multiple search patterns to find the model or enum
+      const searchPatterns = [
+        `model ${modelName}`,          // Try as a model first
+        `enum ${modelName}`,           // Try as an enum  
+        `model ${modelName.toLowerCase()}`,
+        `enum ${modelName.toLowerCase()}`,
+        modelName,                     // Just the entity name
+        `${modelName} {`              // Entity name with opening brace
+      ];
+      
+      let matches: any[] = [];
+      let usedPattern = '';
+      
+      for (const pattern of searchPatterns) {
+        matches = model.findMatches(
+          pattern,
+          false, // not regex
+          false, // not case sensitive
+          false, // not whole word
+          null,
+          true // return all matches
+        );
+        
+        if (matches.length > 0) {
+          usedPattern = pattern;
+          break;
+        }
+      }
+    
+      if (matches.length > 0) {
+        const match = matches[0];
+        const startLine = match.range.startLineNumber;
+        
+        
+        // Simple scroll to the line
+        prismaEditor.revealLineInCenter(startLine);
+        
+        // Set cursor position to the found line
+        prismaEditor.setPosition({
+          lineNumber: startLine,
+          column: 1
+        });
+        
+        // Simple selection of just the line
+        prismaEditor.setSelection({
+          startLineNumber: startLine,
+          startColumn: 1,
+          endLineNumber: startLine,
+          endColumn: model.getLineMaxColumn(startLine)
+        });
+
+        
+        toast({
+          title: "Navigated to Model",
+          description: `Found ${modelName} model in Prisma schema`,
+        });
+      } else {
+        toast({
+          title: "Model Not Found",
+          description: `Could not find model ${modelName} in Prisma schema`,
+          variant: "destructive",
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error during navigation:', error);
+      toast({
+        title: "Navigation Error",
+        description: "An error occurred while navigating to the model",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Hidden file input */}
@@ -425,6 +764,7 @@ export default function Converter() {
               value={sqlInput}
               onChange={(value) => setSqlInput(value || "")}
               beforeMount={handleEditorWillMount}
+              onMount={handleSqlEditorMount}
               theme="vs-dark"
               options={{
                 minimap: { enabled: false },
@@ -491,6 +831,7 @@ export default function Converter() {
                   : defaultPrismaContent)
               }
               beforeMount={handleEditorWillMount}
+              onMount={handlePrismaEditorMount}
               theme="vs-dark"
               options={{
                 readOnly: true,
