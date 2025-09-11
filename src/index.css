@@ -187,12 +187,12 @@
   border-bottom: 2px solid var(--chart-1) !important;
 }
 
-/* Monaco Editor line numbers and gutter styling */
+/* Monaco Editor line numbers and gutter styling - Tokyo Night */
 .monaco-editor .margin,
 .monaco-editor .margin-view-overlays,
 .monaco-editor .gutter,
 .monaco-editor .line-numbers {
-  background-color: #1e1e1e !important;
+  background-color: #16161e !important;
 }
 
 /* Make sure Monaco decorations work */

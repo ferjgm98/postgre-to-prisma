@@ -21,29 +21,33 @@ import {
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 
-// Register Prisma language with Monaco Editor
-const registerPrismaLanguage = () => {
+// Register Prisma language and SQL override with Monaco Editor
+const registerLanguagesAndThemes = () => {
   if (typeof window !== "undefined" && (window as any).monaco) {
     const monaco = (window as any).monaco;
 
-    // Register the language
+    // Register the Prisma language
     monaco.languages.register({ id: "prisma" });
 
-    // Define syntax highlighting tokens
+    // Define enhanced Prisma syntax highlighting tokens
     monaco.languages.setMonarchTokensProvider("prisma", {
       tokenizer: {
         root: [
+          // Comments first
+          [/\/\/.*$/, "comment"],
+          [/\/\*/, "comment", "@comment"],
+
           // Keywords
           [/\b(model|enum|datasource|generator|type)\b/, "keyword"],
 
-          // Data types
-          [
-            /\b(String|Int|BigInt|Boolean|DateTime|Float|Decimal|Json|Bytes)\b/,
-            "type",
-          ],
+          // Boolean literals
+          [/\b(true|false)\b/, "boolean"],
 
-          // Decorators/Attributes
-          [/@@?\w+(\([^)]*\))?/, "annotation"],
+          // Prisma functions (must come before types)
+          [/\b(now|autoincrement|cuid|uuid|dbgenerated)\b/, "function"],
+
+          // Decorators/Attributes (before other patterns)
+          [/@@?\w+/, "annotation"],
 
           // Strings
           [/"([^"\\]|\\.)*$/, "string.invalid"],
@@ -51,21 +55,32 @@ const registerPrismaLanguage = () => {
           [/'([^'\\]|\\.)*$/, "string.invalid"],
           [/'([^'\\]|\\.)*'/, "string"],
 
-          // Comments
-          [/\/\/.*$/, "comment"],
-          [/\/\*/, "comment", "@comment"],
-
           // Numbers
-          [/\d*\.\d+([eE][\-+]?\d+)?/, "number.float"],
-          [/0[xX][0-9a-fA-F]+/, "number.hex"],
+          [/\d*\.\d+([eE][\-+]?\d+)?/, "number"],
+          [/0[xX][0-9a-fA-F]+/, "number"],
           [/\d+/, "number"],
 
-          // Identifiers
-          [/[a-zA-Z_]\w*/, "identifier"],
+          // Array brackets
+          [/\[\]/, "array-brackets"],
+
+          // Optional marker
+          [/\?/, "optional"],
+
+          // Data types (specific built-in types)
+          [/\b(String|Int|BigInt|Boolean|DateTime|Float|Decimal|Json|Bytes)\b/, "type"],
+
+          // Model/Enum references (capitalized identifiers in type position)
+          [/\b[A-Z][a-zA-Z0-9_]*\b/, "model-reference"],
+
+          // Operators
+          [/[=<>!]+/, "operator"],
+
+          // Field names and other identifiers (simplified - will be colored as field names)
+          [/\b[a-zA-Z_]\w*\b/, "field-name"],
 
           // Whitespace and others
           [/[ \t\r\n]+/, "white"],
-          [/[{}()\[\]]/, "@brackets"],
+          [/[{}()]/, "@brackets"],
           [/[;,.]/, "delimiter"],
         ],
         comment: [
@@ -77,26 +92,122 @@ const registerPrismaLanguage = () => {
       },
     });
 
-    // Define custom theme for Prisma
-    monaco.editor.defineTheme("prisma-theme", {
+    // Override SQL tokenizer after Monaco loads its default
+    setTimeout(() => {
+      monaco.languages.setMonarchTokensProvider("sql", {
+        tokenizer: {
+          root: [
+            // SQL Keywords
+            [/\b(CREATE|TABLE|TYPE|ENUM|ALTER|DROP|INSERT|UPDATE|DELETE|SELECT|FROM|WHERE|JOIN|INNER|LEFT|RIGHT|OUTER|ON|AS|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|UNION|INTERSECT|EXCEPT)\b/i, "keyword"],
+            
+            // SQL Data Types
+            [/\b(VARCHAR|CHAR|TEXT|INT|INTEGER|BIGINT|SMALLINT|DECIMAL|NUMERIC|FLOAT|REAL|DOUBLE|BOOLEAN|BOOL|DATE|TIME|TIMESTAMP|TIMESTAMPTZ|UUID|JSON|JSONB|BYTEA|SERIAL|BIGSERIAL)\b/i, "type"],
+            
+            // SQL Constraints and Modifiers
+            [/\b(PRIMARY|KEY|FOREIGN|REFERENCES|UNIQUE|NOT|NULL|DEFAULT|CHECK|CONSTRAINT|INDEX|AUTO_INCREMENT|AUTOINCREMENT)\b/i, "keyword"],
+            
+            // SQL Functions
+            [/\b(CURRENT_TIMESTAMP|NOW|COUNT|SUM|AVG|MIN|MAX|CONCAT|SUBSTRING|LENGTH|UPPER|LOWER|TRIM|COALESCE|NULLIF)\b/i, "predefined"],
+            
+            // Strings
+            [/'([^'\\]|\\.)*'/, "string"],
+            [/"([^"\\]|\\.)*"/, "string"],
+            
+            // Comments
+            [/--.*$/, "comment"],
+            [/\/\*/, "comment", "@comment"],
+            
+            // Numbers
+            [/\d*\.\d+([eE][\-+]?\d+)?/, "number"],
+            [/\d+/, "number"],
+            
+            // Operators
+            [/[=<>!]+/, "operator"],
+            [/[+\-*/]/, "operator"],
+            
+            // Identifiers
+            [/[a-zA-Z_]\w*/, "identifier"],
+            
+            // Delimiters
+            [/[;,.]/, "delimiter"],
+            [/[()[\]{}]/, "@brackets"],
+            
+            // Whitespace
+            [/[ \t\r\n]+/, "white"],
+          ],
+          comment: [
+            [/[^\/*]+/, "comment"],
+            [/\/\*/, "comment", "@push"],
+            [/\*\//, "comment", "@pop"],
+            [/[\/*]/, "comment"],
+          ],
+        },
+      });
+    }, 100);
+
+    // Define Tokyo Night SQL theme with correct token mappings
+    monaco.editor.defineTheme("tokyonight-sql-theme", {
       base: "vs-dark",
-      inherit: true,
+      inherit: false,
       rules: [
-        { token: "keyword", foreground: "C586C0" },
-        { token: "type", foreground: "4EC9B0" },
-        { token: "annotation", foreground: "DCDCAA" },
-        { token: "string", foreground: "CE9178" },
-        { token: "comment", foreground: "6A9955" },
-        { token: "number", foreground: "B5CEA8" },
-        { token: "identifier", foreground: "9CDCFE" },
+        { token: "keyword", foreground: "BB9AF7", fontStyle: "bold" },
+        { token: "type", foreground: "7DCFFF", fontStyle: "bold" },
+        { token: "predefined", foreground: "7AA2F7" },
+        { token: "string", foreground: "9ECE6A" },
+        { token: "comment", foreground: "565F89", fontStyle: "italic" },
+        { token: "number", foreground: "FF9E64" },
+        { token: "identifier", foreground: "C0CAF5" },
+        { token: "operator", foreground: "89DDFF" },
+        { token: "delimiter", foreground: "C0CAF5" },
+        { token: "white", foreground: "C0CAF5" },
       ],
       colors: {
-        'editor.background': '#1e1e1e',
-        'editorGutter.background': '#1e1e1e',
-        'editorLineNumber.background': '#1e1e1e',
-        'editorLineNumber.foreground': '#6E7681',
-        'editorLineNumber.activeForeground': '#c6c6c6',
-        'editorGutter.border': 'transparent'
+        'editor.background': '#16161e',
+        'editorGutter.background': '#16161e',
+        'editorLineNumber.background': '#16161e',
+        'editorLineNumber.foreground': '#545c7e',
+        'editorLineNumber.activeForeground': '#C0CAF5',
+        'editorGutter.border': 'transparent',
+        'editor.foreground': '#C0CAF5',
+        'editorCursor.foreground': '#C0CAF5',
+        'editor.selectionBackground': '#2d3f76',
+        'editor.lineHighlightBackground': '#1a1b26'
+      },
+    });
+
+    // Define Tokyo Night Prisma theme with enhanced color variety
+    monaco.editor.defineTheme("tokyonight-prisma-theme", {
+      base: "vs-dark",
+      inherit: false,
+      rules: [
+        { token: "keyword", foreground: "BB9AF7", fontStyle: "bold" },
+        { token: "type", foreground: "7DCFFF", fontStyle: "bold" },
+        { token: "field-name", foreground: "73DACA" }, // Aqua/teal for field names
+        { token: "model-reference", foreground: "9D7CD8" }, // Light purple for model references
+        { token: "annotation", foreground: "E0AF68" }, // Yellow for decorators
+        { token: "function", foreground: "F7768E" }, // Pink/magenta for functions
+        { token: "boolean", foreground: "FF9E64" }, // Orange for true/false
+        { token: "string", foreground: "9ECE6A" }, // Green for strings
+        { token: "comment", foreground: "565F89", fontStyle: "italic" },
+        { token: "number", foreground: "FF9E64" },
+        { token: "operator", foreground: "89DDFF" }, // Light blue for operators
+        { token: "optional", foreground: "F7768E" }, // Pink for ? optional markers
+        { token: "array-brackets", foreground: "F7768E" }, // Pink for [] array brackets
+        { token: "identifier", foreground: "A9B1D6" }, // Slightly dimmer fallback color
+        { token: "delimiter", foreground: "565F89" }, // Muted delimiters
+        { token: "white", foreground: "C0CAF5" },
+      ],
+      colors: {
+        'editor.background': '#16161e',
+        'editorGutter.background': '#16161e',
+        'editorLineNumber.background': '#16161e',
+        'editorLineNumber.foreground': '#545c7e',
+        'editorLineNumber.activeForeground': '#C0CAF5',
+        'editorGutter.border': 'transparent',
+        'editor.foreground': '#C0CAF5',
+        'editorCursor.foreground': '#C0CAF5',
+        'editor.selectionBackground': '#2d3f76',
+        'editor.lineHighlightBackground': '#1a1b26'
       },
     });
   }
@@ -178,9 +289,9 @@ export default function Converter() {
   const sqlInputRef = useRef(sqlInput);
   const currentDecorationsRef = useRef<string[]>([]);
 
-  // Initialize Monaco with Prisma language support
+  // Initialize Monaco with language support and themes
   const handleEditorWillMount = (_monaco: any) => {
-    registerPrismaLanguage();
+    registerLanguagesAndThemes();
   };
 
   // Extract navigable entities (tables and enums) from SQL content
@@ -779,7 +890,7 @@ export default function Converter() {
               onChange={(value) => setSqlInput(value || "")}
               beforeMount={handleEditorWillMount}
               onMount={handleSqlEditorMount}
-              theme="prisma-theme"
+              theme="tokyonight-sql-theme"
               options={{
                 minimap: { enabled: false },
                 lineNumbers: "on",
@@ -846,7 +957,7 @@ export default function Converter() {
               }
               beforeMount={handleEditorWillMount}
               onMount={handlePrismaEditorMount}
-              theme="prisma-theme"
+              theme="tokyonight-prisma-theme"
               options={{
                 readOnly: true,
                 minimap: { enabled: false },
