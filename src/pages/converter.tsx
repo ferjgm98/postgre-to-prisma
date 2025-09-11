@@ -90,7 +90,14 @@ const registerPrismaLanguage = () => {
         { token: "number", foreground: "B5CEA8" },
         { token: "identifier", foreground: "9CDCFE" },
       ],
-      colors: {},
+      colors: {
+        'editor.background': '#1e1e1e',
+        'editorGutter.background': '#1e1e1e',
+        'editorLineNumber.background': '#1e1e1e',
+        'editorLineNumber.foreground': '#6E7681',
+        'editorLineNumber.activeForeground': '#c6c6c6',
+        'editorGutter.border': 'transparent'
+      },
     });
   }
 };
@@ -772,7 +779,7 @@ export default function Converter() {
               onChange={(value) => setSqlInput(value || "")}
               beforeMount={handleEditorWillMount}
               onMount={handleSqlEditorMount}
-              theme="vs-dark"
+              theme="prisma-theme"
               options={{
                 minimap: { enabled: false },
                 lineNumbers: "on",
@@ -839,7 +846,7 @@ export default function Converter() {
               }
               beforeMount={handleEditorWillMount}
               onMount={handlePrismaEditorMount}
-              theme="vs-dark"
+              theme="prisma-theme"
               options={{
                 readOnly: true,
                 minimap: { enabled: false },

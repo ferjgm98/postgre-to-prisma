@@ -156,18 +156,7 @@
   overflow-x: auto;
 }
 
-.line-numbers {
-  color: var(--muted-foreground);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 20px;
-  user-select: none;
-  text-align: right;
-  padding-right: 12px;
-  border-right: 1px solid var(--border);
-  background: var(--muted);
-  min-width: 50px;
-}
+/* Removed .line-numbers class - Monaco Editor handles this internally */
 
 
 .syntax-highlighted {
@@ -196,6 +185,14 @@
   text-decoration: underline !important;
   cursor: pointer !important;
   border-bottom: 2px solid var(--chart-1) !important;
+}
+
+/* Monaco Editor line numbers and gutter styling */
+.monaco-editor .margin,
+.monaco-editor .margin-view-overlays,
+.monaco-editor .gutter,
+.monaco-editor .line-numbers {
+  background-color: #1e1e1e !important;
 }
 
 /* Make sure Monaco decorations work */
