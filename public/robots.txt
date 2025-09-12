@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://sql-to-prisma.ferjgm98.dev/sitemap.xml
+
+# Block common bot paths that don't apply to this app
+Disallow: /api/
+Disallow: /_next/
+Disallow: /.well-known/
