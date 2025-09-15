@@ -1,0 +1,11 @@
+---
+globs: src/components/ui/**/*.tsx,src/pages/**/*.tsx
+description: shadcn/ui usage and styling guidance
+---
+
+# UI usage
+
+- Prefer shadcn/ui and Radix primitives from `src/components/ui/`.
+- Maintain responsive layout; ensure mobile usability (use `hooks/use-mobile`).
+- Support dark theme; avoid hardcoded colors—use Tailwind tokens.
+- Reuse existing components instead of creating ad-hoc UI.

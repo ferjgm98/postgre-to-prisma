@@ -1,0 +1,21 @@
+---
+globs: src/**/*.ts,src/**/*.tsx
+description: Code style and quality expectations
+---
+
+# Coding standards
+
+- Prefer explicit, descriptive names. Avoid 1–2 character identifiers.
+- Functional React components with TypeScript types.
+- Keep services pure; isolate UI concerns to components.
+- Handle errors gracefully; surface user‑facing issues via toasts.
+- Maintain strict TypeScript; run `npm run type-check` regularly.
+- Avoid deep nesting; use early returns and guard clauses.
+- No catching without meaningful handling.
+- Add minimal, high‑signal comments explaining "why" for complex logic.
+- Keep imports using `@/*` alias when applicable.
+
+## Performance and UX
+
+- Debounce expensive operations (300ms for conversion).
+- Avoid unnecessary re‑renders with `useMemo`/`useCallback` where helpful.

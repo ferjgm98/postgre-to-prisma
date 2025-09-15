@@ -1,0 +1,14 @@
+---
+alwaysApply: false
+description: Known limitations and scope boundaries
+---
+
+# Known limitations
+
+- Complex CHECK constraints not supported.
+- Some PostgreSQL DEFAULT functions may need manual adjustment.
+- Materialized views unsupported.
+
+# Roadmap (non-binding)
+
+- Future: MySQL/SQLite support, schema import/export, validation, batch conversion, naming conventions, visualization.

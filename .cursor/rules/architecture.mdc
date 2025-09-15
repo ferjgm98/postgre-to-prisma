@@ -1,0 +1,25 @@
+---
+globs: src/**/*.ts,src/**/*.tsx
+description: Architectural guidance from docs
+---
+
+# Architecture and data flow
+
+## Flow
+
+1. Input: SQL typed in left Monaco editor
+2. Parse: `SQLParser.parseSQL(sql)` → `SQLParseResult`
+3. Generate: `PrismaGenerator.generatePrismaSchema(ast)` → string
+4. Output: Prisma schema shown in right editor
+
+## Responsibilities
+
+- `src/services/sql-parser.ts`: Parse PostgreSQL features (CREATE TABLE, CREATE TYPE AS ENUM, ALTER TABLE, PK/FK, composite keys, quoted identifiers). Return `SQLTable[]`, `SQLEnum[]`.
+- `src/services/prisma-generator.ts`: Convert AST → Prisma. Handle relations (one-to-many, many-to-many, self‑refs), `@id`, `@relation`, `@map`, defaults, `@db.*` types.
+- `src/pages/converter.tsx`: UI orchestration, debounced conversion, status and toasts.
+
+## Conventions
+
+- Use path alias `@/*` for imports.
+- Keep components functional; hooks for reusable logic.
+- Avoid side effects in services; make them pure functions where possible.

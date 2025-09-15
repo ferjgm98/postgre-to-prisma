@@ -1,0 +1,12 @@
+---
+globs: src/pages/converter.tsx
+description: Monaco editor integration and UX expectations
+---
+
+# Monaco editor integration
+
+- Register custom Prisma language and theme (`prisma-theme`).
+- Dual-pane layout: left (SQL), right (Prisma output).
+- Debounce input by 300ms before parsing/generation.
+- Provide copy buttons for each pane.
+- Surface parse/generation errors non-blockingly (toast/status), keep editor responsive.

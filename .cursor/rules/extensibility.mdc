@@ -1,0 +1,20 @@
+---
+globs: src/services/prisma-generator.ts
+description: Guidance for extending SQL→Prisma mappings
+---
+
+# Extensibility: type mapping and attributes
+
+- Extend type mapping in `mapSQLTypeToPrismaType(sqlType: string)`.
+- Add new cases using uppercase matching; map to Prisma scalars.
+- For PostgreSQL specifics, prefer `@db.*` attributes where relevant.
+- For custom attributes, adjust `convertColumnToField()` logic.
+
+## Example (pseudo)
+
+```ts
+switch (type) {
+  case "YOUR_CUSTOM_TYPE":
+    return "String";
+}
+```

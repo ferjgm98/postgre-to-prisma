@@ -1,0 +1,41 @@
+---
+alwaysApply: true
+---
+
+# SQL → Prisma Converter: Project Overview
+
+This repository implements a real‑time PostgreSQL SQL → Prisma schema converter.
+
+- Main page: [src/pages/converter.tsx](mdc:src/pages/converter.tsx)
+- Core services: [src/services/sql-parser.ts](mdc:src/services/sql-parser.ts), [src/services/prisma-generator.ts](mdc:src/services/prisma-generator.ts)
+- Types: [src/types/index.ts](mdc:src/types/index.ts)
+- Docs: [README.md](mdc:README.md), [CLAUDE.md](mdc:CLAUDE.md)
+
+## Quick start
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+## Tech stack
+
+- React 18 + TypeScript + Vite
+- UI: shadcn/ui + Radix UI + Tailwind CSS
+- Editor: Monaco Editor (custom Prisma language + `prisma-theme`)
+- Path alias: `@` → `./src`
+
+## Project structure
+
+```
+src/
+├─ components/ui/      # shadcn/ui components
+├─ hooks/              # custom hooks
+├─ lib/                # utilities
+├─ pages/              # routes (converter UI)
+├─ services/           # SQL parsing + Prisma generation
+├─ types/              # shared TypeScript types
+└─ App.tsx             # application shell
+```

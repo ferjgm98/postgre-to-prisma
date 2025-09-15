@@ -1,0 +1,29 @@
+---
+globs: src/pages/converter.tsx,src/services/**/*.ts
+description: Converter feature behavior and UX rules
+---
+
+# Converter behavior
+
+- Real‑time conversion with 300ms debounce.
+- Show conversion status (ready/converting/error) and table count.
+- Provide copy‑to‑clipboard for both SQL and Prisma outputs.
+- Respect dark mode and responsive layout.
+
+## Supported SQL features
+
+- CREATE TABLE with PostgreSQL types
+- Column constraints: NOT NULL, UNIQUE, PRIMARY KEY
+- Defaults including functions (e.g., CURRENT_TIMESTAMP)
+- SERIAL/BIGSERIAL autoincrement
+- FOREIGN KEY (inline and ALTER TABLE), composite keys
+- Self‑referencing and many‑to‑many relations
+- Enums via CREATE TYPE AS ENUM
+- JSON/JSONB, UUID (with default), timestamps
+
+## Prisma generation expectations
+
+- Bidirectional relations with consistent field naming
+- Proper attributes: `@id`, `@default`, `@relation`, `@map`, `@unique`
+- PostgreSQL mappings (`@db.Uuid`, `@db.JsonB`, etc.)
+- Correct optionality/nullable handling

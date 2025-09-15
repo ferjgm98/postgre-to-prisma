@@ -1,0 +1,10 @@
+---
+globs: src/services/**/*.ts
+description: Testing focus areas for services
+---
+
+# Testing guidance
+
+- Prioritize unit tests for `sql-parser` and `prisma-generator` when adding test infra.
+- Cover: enums, composite keys, self‑refs, many‑to‑many, defaults, `@db.*` mappings.
+- Add integration tests for end‑to‑end SQL → Prisma conversions of representative schemas.

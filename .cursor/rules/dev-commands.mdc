@@ -1,0 +1,19 @@
+---
+globs: package.json,*.ts,*.tsx
+description: Common dev commands and checks
+---
+
+# Development commands
+
+```bash
+npm install            # install deps
+npm run dev            # start dev server
+npm run build          # production build
+npm run preview        # preview dist
+npm run type-check     # TypeScript diagnostics
+```
+
+## Expectations
+
+- Keep TypeScript strict. Resolve type errors before committing.
+- Do not introduce linter/type errors in edited files.
