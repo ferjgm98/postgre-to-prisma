@@ -1,91 +1,134 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <!-- Primary Meta Tags -->
-        <title>SQL to Prisma Schema Converter - Free Online Tool</title>
-        <meta
-            name="title"
-            content="SQL to Prisma Schema Converter - Free Online Tool"
-        />
-        <meta
-            name="description"
-            content="Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface."
-        />
-        <meta
-            name="keywords"
-            content="SQL to Prisma, Prisma converter, PostgreSQL to Prisma, database schema converter, Prisma ORM, SQL parser, database migration tool"
-        />
-        <meta name="author" content="SQL to Prisma Converter" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://sql-to-prisma.ferjgm98.dev/" />
+    <!-- Primary Meta Tags -->
+    <title>SQL to Prisma Schema Converter - Free Online Tool</title>
+    <meta
+      name="title"
+      content="SQL to Prisma Schema Converter - Free Online Tool"
+    />
+    <meta
+      name="description"
+      content="Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface."
+    />
+    <meta
+      name="keywords"
+      content="SQL to Prisma, Prisma converter, PostgreSQL to Prisma, database schema converter, Prisma ORM, SQL parser, database migration tool"
+    />
+    <meta name="author" content="SQL to Prisma Converter" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://sql-to-prisma.ferjgm98.dev/" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="robots" href="/robots.txt" />
+    <meta name="application-name" content="SQL to Prisma Converter" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="format-detection"
+      content="telephone=no, date=no, address=no, email=no"
+    />
 
-        <!-- Open Graph / Facebook -->
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://sql-to-prisma.ferjgm98.dev/" />
-        <meta
-            property="og:title"
-            content="SQL to Prisma Schema Converter - Free Online Tool"
-        />
-        <meta
-            property="og:description"
-            content="Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface."
-        />
-        <meta
-            property="og:image"
-            content="https://sql-to-prisma.ferjgm98.dev/og-image.png"
-        />
-        <meta property="og:site_name" content="SQL to Prisma Converter" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sql-to-prisma.ferjgm98.dev/" />
+    <meta
+      property="og:title"
+      content="SQL to Prisma Schema Converter - Free Online Tool"
+    />
+    <meta
+      property="og:description"
+      content="Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface."
+    />
+    <meta
+      property="og:image"
+      content="https://sql-to-prisma.ferjgm98.dev/og-image.png"
+    />
+    <meta
+      property="og:image:secure_url"
+      content="https://sql-to-prisma.ferjgm98.dev/og-image.png"
+    />
+    <meta
+      property="og:image:alt"
+      content="SQL to Prisma Schema Converter - tool interface preview"
+    />
+    <meta property="og:site_name" content="SQL to Prisma Converter" />
 
-        <!-- Twitter -->
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta
-            property="twitter:url"
-            content="https://sql-to-prisma.ferjgm98.dev/"
-        />
-        <meta
-            property="twitter:title"
-            content="SQL to Prisma Schema Converter - Free Online Tool"
-        />
-        <meta
-            property="twitter:description"
-            content="Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface."
-        />
-        <meta
-            property="twitter:image"
-            content="https://sql-to-prisma.ferjgm98.dev/og-image.png"
-        />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://sql-to-prisma.ferjgm98.dev/"
+    />
+    <meta
+      property="twitter:title"
+      content="SQL to Prisma Schema Converter - Free Online Tool"
+    />
+    <meta
+      property="twitter:description"
+      content="Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface."
+    />
+    <meta
+      property="twitter:image"
+      content="https://sql-to-prisma.ferjgm98.dev/og-image.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="SQL to Prisma Schema Converter - tool interface preview"
+    />
 
-        <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link
-            rel="apple-touch-icon"
-            sizes="180x180"
-            href="/apple-touch-icon.png"
-        />
-        <link
-            rel="icon"
-            type="image/png"
-            sizes="32x32"
-            href="/favicon-32x32.png"
-        />
-        <link
-            rel="icon"
-            type="image/png"
-            sizes="16x16"
-            href="/favicon-16x16.png"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
-            rel="stylesheet"
-        />
-    </head>
-    <body>
-        <div id="root"></div>
-        <script type="module" src="/src/main.tsx"></script>
-    </body>
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "SQL to Prisma Converter",
+        "url": "https://sql-to-prisma.ferjgm98.dev/",
+        "description": "Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface.",
+        "inLanguage": "en"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SQL to Prisma Converter",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "url": "https://sql-to-prisma.ferjgm98.dev/",
+        "image": "https://sql-to-prisma.ferjgm98.dev/og-image.png",
+        "description": "Convert PostgreSQL SQL schemas to Prisma schema files instantly. Free online tool with real-time conversion, syntax highlighting, and dual-pane editor interface.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "SQL to Prisma Converter"
+        }
+      }
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <noscript>
+      This tool requires JavaScript to run. You can still view the project
+      description and repository in the README.
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
