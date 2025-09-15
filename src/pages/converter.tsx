@@ -29,6 +29,11 @@ const registerLanguagesAndThemes = () => {
     // Register the Prisma language
     monaco.languages.register({ id: "prisma" });
 
+    // Configure word pattern for Prisma to include PascalCase identifiers
+    monaco.languages.setLanguageConfiguration("prisma", {
+      wordPattern: /[a-zA-Z_][\w]*/,
+    });
+
     // Define enhanced Prisma syntax highlighting tokens
     monaco.languages.setMonarchTokensProvider("prisma", {
       tokenizer: {
@@ -67,7 +72,10 @@ const registerLanguagesAndThemes = () => {
           [/\?/, "optional"],
 
           // Data types (specific built-in types)
-          [/\b(String|Int|BigInt|Boolean|DateTime|Float|Decimal|Json|Bytes)\b/, "type"],
+          [
+            /\b(String|Int|BigInt|Boolean|DateTime|Float|Decimal|Json|Bytes)\b/,
+            "type",
+          ],
 
           // Model/Enum references (capitalized identifiers in type position)
           [/\b[A-Z][a-zA-Z0-9_]*\b/, "model-reference"],
@@ -98,40 +106,52 @@ const registerLanguagesAndThemes = () => {
         tokenizer: {
           root: [
             // SQL Keywords
-            [/\b(CREATE|TABLE|TYPE|ENUM|ALTER|DROP|INSERT|UPDATE|DELETE|SELECT|FROM|WHERE|JOIN|INNER|LEFT|RIGHT|OUTER|ON|AS|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|UNION|INTERSECT|EXCEPT)\b/i, "keyword"],
-            
+            [
+              /\b(CREATE|TABLE|TYPE|ENUM|ALTER|DROP|INSERT|UPDATE|DELETE|SELECT|FROM|WHERE|JOIN|INNER|LEFT|RIGHT|OUTER|ON|AS|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|UNION|INTERSECT|EXCEPT)\b/i,
+              "keyword",
+            ],
+
             // SQL Data Types
-            [/\b(VARCHAR|CHAR|TEXT|INT|INTEGER|BIGINT|SMALLINT|DECIMAL|NUMERIC|FLOAT|REAL|DOUBLE|BOOLEAN|BOOL|DATE|TIME|TIMESTAMP|TIMESTAMPTZ|UUID|JSON|JSONB|BYTEA|SERIAL|BIGSERIAL)\b/i, "type"],
-            
+            [
+              /\b(VARCHAR|CHAR|TEXT|INT|INTEGER|BIGINT|SMALLINT|DECIMAL|NUMERIC|FLOAT|REAL|DOUBLE|BOOLEAN|BOOL|DATE|TIME|TIMESTAMP|TIMESTAMPTZ|UUID|JSON|JSONB|BYTEA|SERIAL|BIGSERIAL)\b/i,
+              "type",
+            ],
+
             // SQL Constraints and Modifiers
-            [/\b(PRIMARY|KEY|FOREIGN|REFERENCES|UNIQUE|NOT|NULL|DEFAULT|CHECK|CONSTRAINT|INDEX|AUTO_INCREMENT|AUTOINCREMENT)\b/i, "keyword"],
-            
+            [
+              /\b(PRIMARY|KEY|FOREIGN|REFERENCES|UNIQUE|NOT|NULL|DEFAULT|CHECK|CONSTRAINT|INDEX|AUTO_INCREMENT|AUTOINCREMENT)\b/i,
+              "keyword",
+            ],
+
             // SQL Functions
-            [/\b(CURRENT_TIMESTAMP|NOW|COUNT|SUM|AVG|MIN|MAX|CONCAT|SUBSTRING|LENGTH|UPPER|LOWER|TRIM|COALESCE|NULLIF)\b/i, "predefined"],
-            
+            [
+              /\b(CURRENT_TIMESTAMP|NOW|COUNT|SUM|AVG|MIN|MAX|CONCAT|SUBSTRING|LENGTH|UPPER|LOWER|TRIM|COALESCE|NULLIF)\b/i,
+              "predefined",
+            ],
+
             // Strings
             [/'([^'\\]|\\.)*'/, "string"],
             [/"([^"\\]|\\.)*"/, "string"],
-            
+
             // Comments
             [/--.*$/, "comment"],
             [/\/\*/, "comment", "@comment"],
-            
+
             // Numbers
             [/\d*\.\d+([eE][\-+]?\d+)?/, "number"],
             [/\d+/, "number"],
-            
+
             // Operators
             [/[=<>!]+/, "operator"],
             [/[+\-*/]/, "operator"],
-            
+
             // Identifiers
             [/[a-zA-Z_]\w*/, "identifier"],
-            
+
             // Delimiters
             [/[;,.]/, "delimiter"],
             [/[()[\]{}]/, "@brackets"],
-            
+
             // Whitespace
             [/[ \t\r\n]+/, "white"],
           ],
@@ -162,16 +182,16 @@ const registerLanguagesAndThemes = () => {
         { token: "white", foreground: "C0CAF5" },
       ],
       colors: {
-        'editor.background': '#16161e',
-        'editorGutter.background': '#16161e',
-        'editorLineNumber.background': '#16161e',
-        'editorLineNumber.foreground': '#545c7e',
-        'editorLineNumber.activeForeground': '#C0CAF5',
-        'editorGutter.border': 'transparent',
-        'editor.foreground': '#C0CAF5',
-        'editorCursor.foreground': '#C0CAF5',
-        'editor.selectionBackground': '#2d3f76',
-        'editor.lineHighlightBackground': '#1a1b26'
+        "editor.background": "#16161e",
+        "editorGutter.background": "#16161e",
+        "editorLineNumber.background": "#16161e",
+        "editorLineNumber.foreground": "#545c7e",
+        "editorLineNumber.activeForeground": "#C0CAF5",
+        "editorGutter.border": "transparent",
+        "editor.foreground": "#C0CAF5",
+        "editorCursor.foreground": "#C0CAF5",
+        "editor.selectionBackground": "#2d3f76",
+        "editor.lineHighlightBackground": "#1a1b26",
       },
     });
 
@@ -198,16 +218,16 @@ const registerLanguagesAndThemes = () => {
         { token: "white", foreground: "C0CAF5" },
       ],
       colors: {
-        'editor.background': '#16161e',
-        'editorGutter.background': '#16161e',
-        'editorLineNumber.background': '#16161e',
-        'editorLineNumber.foreground': '#545c7e',
-        'editorLineNumber.activeForeground': '#C0CAF5',
-        'editorGutter.border': 'transparent',
-        'editor.foreground': '#C0CAF5',
-        'editorCursor.foreground': '#C0CAF5',
-        'editor.selectionBackground': '#2d3f76',
-        'editor.lineHighlightBackground': '#1a1b26'
+        "editor.background": "#16161e",
+        "editorGutter.background": "#16161e",
+        "editorLineNumber.background": "#16161e",
+        "editorLineNumber.foreground": "#545c7e",
+        "editorLineNumber.activeForeground": "#C0CAF5",
+        "editorGutter.border": "transparent",
+        "editor.foreground": "#C0CAF5",
+        "editorCursor.foreground": "#C0CAF5",
+        "editor.selectionBackground": "#2d3f76",
+        "editor.lineHighlightBackground": "#1a1b26",
       },
     });
   }
@@ -297,7 +317,7 @@ export default function Converter() {
   // Extract navigable entities (tables and enums) from SQL content
   const getSQLEntitiesFromSQL = (sql: string): Set<string> => {
     const entityNames = new Set<string>();
-    
+
     // Match CREATE TABLE statements
     const createTableRegex =
       /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([`"]?)([a-zA-Z_][\w]*)\1/gi;
@@ -305,7 +325,7 @@ export default function Converter() {
     while ((match = createTableRegex.exec(sql)) !== null) {
       entityNames.add(match[2].toLowerCase());
     }
-    
+
     // Match CREATE TYPE ... AS ENUM statements
     const createTypeRegex =
       /CREATE\s+TYPE\s+([`"]?)([a-zA-Z_][\w]*)\1\s+AS\s+ENUM/gi;
@@ -358,7 +378,7 @@ export default function Converter() {
   // Handle SQL editor mount
   const handleSqlEditorMount = (editor: any, monaco: any) => {
     sqlEditorRef.current = editor;
-    
+
     // Configure word pattern for SQL to include underscores
     monaco.languages.setLanguageConfiguration("sql", {
       wordPattern: /[a-zA-Z_][\w]*/,
@@ -397,11 +417,15 @@ export default function Converter() {
                   options: {
                     className: "table-hover-highlight",
                     hoverMessage: {
-                      value: `${navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}+click to navigate to ${sqlToPrismaName(selectedText)} model`,
+                      value: `${
+                        navigator.platform.includes("Mac") ? "⌘" : "Ctrl"
+                      }+click to navigate to ${sqlToPrismaName(
+                        selectedText
+                      )} model`,
                     },
                   },
                 },
-              ],
+              ]
             );
             currentDecorationsRef.current = decorations;
           } else {
@@ -443,9 +467,237 @@ export default function Converter() {
     });
   };
 
+  // Extract navigable entities (models and enums) from Prisma content
+  const getPrismaEntitiesFromPrisma = (prisma: string): Set<string> => {
+    const entityNames = new Set<string>();
+
+    // Match model declarations (more flexible - handles indentation)
+    const modelRegex = /^\s*model\s+([A-Z][a-zA-Z0-9_]*)/gm;
+    let match;
+    while ((match = modelRegex.exec(prisma)) !== null) {
+      console.log("Found model:", match[1]);
+      entityNames.add(match[1]);
+    }
+
+    // Match enum declarations (more flexible - handles indentation)
+    const enumRegex = /^\s*enum\s+([A-Z][a-zA-Z0-9_]*)/gm;
+    while ((match = enumRegex.exec(prisma)) !== null) {
+      console.log("Found enum:", match[1]);
+      entityNames.add(match[1]);
+    }
+
+    console.log(
+      "Total entities found:",
+      entityNames.size,
+      Array.from(entityNames)
+    );
+    return entityNames;
+  };
+
+  // Enhanced word detection for Prisma (handles PascalCase model names)
+  const getPrismaWordAtPosition = (editor: any, position: any) => {
+    const model = editor.getModel();
+    if (!model) return null;
+
+    // Get the line content
+    const lineContent = model.getLineContent(position.lineNumber);
+    const offset = position.column - 1;
+
+    console.log("Line content:", lineContent, "offset:", offset);
+
+    // First try Monaco's built-in method
+    const monacoWord = model.getWordAtPosition(position);
+    console.log("Monaco word:", monacoWord);
+
+    // If Monaco found a word that matches PascalCase, use it
+    if (monacoWord && /^[A-Z][a-zA-Z0-9_]*$/.test(monacoWord.word)) {
+      console.log("Using Monaco word (PascalCase):", monacoWord.word);
+      return monacoWord;
+    }
+
+    // Fallback: manually extract PascalCase identifiers
+    const identifierRegex = /\b([A-Z][a-zA-Z0-9_]*)\b/g;
+    let match;
+
+    while ((match = identifierRegex.exec(lineContent)) !== null) {
+      const start = match.index;
+      const end = start + match[1].length;
+
+      console.log(
+        "Regex match:",
+        match[1],
+        "start:",
+        start,
+        "end:",
+        end,
+        "offset in range:",
+        offset >= start && offset < end
+      );
+
+      if (offset >= start && offset < end) {
+        const result = {
+          word: match[1], // The PascalCase identifier
+          startColumn: start + 1, // Monaco uses 1-based columns
+          endColumn: end + 1,
+        };
+        console.log("Using manual regex result:", result);
+        return result;
+      }
+    }
+
+    // If nothing else worked, return Monaco's result
+    console.log("Using Monaco fallback:", monacoWord);
+    return monacoWord;
+  };
+
   // Handle Prisma editor mount
-  const handlePrismaEditorMount = (editor: any, _monaco: any) => {
+  const handlePrismaEditorMount = (editor: any, monaco: any) => {
     prismaEditorRef.current = editor;
+
+    // Handle mouse move for hover effects
+    editor.onMouseMove((e: any) => {
+      console.log(
+        "Prisma mouse move:",
+        isModifierPressedRef.current,
+        e.target.position
+      );
+      if (!isModifierPressedRef.current) {
+        // Clear decorations if no modifier is pressed
+        const currentDecorations = prismaEditorRef.current
+          ?.getModel()
+          ?.getAllDecorations();
+        if (currentDecorations) {
+          const modelDecorations = currentDecorations.filter(
+            (d: any) => d.options.className === "prisma-model-hover-highlight"
+          );
+          if (modelDecorations.length > 0) {
+            editor.deltaDecorations(
+              modelDecorations.map((d: any) => d.id),
+              []
+            );
+          }
+        }
+        return;
+      }
+
+      const position = e.target.position;
+      if (position) {
+        const word = getPrismaWordAtPosition(editor, position);
+        console.log("Prisma word at position:", word);
+        if (word) {
+          const selectedText = word.word;
+          // Get current content from the editor model instead of React state
+          const model = editor.getModel();
+          const currentContent = model ? model.getValue() : "";
+          const entityNames = getPrismaEntitiesFromPrisma(currentContent);
+          console.log(
+            "Prisma entities:",
+            entityNames,
+            "selectedText:",
+            selectedText,
+            "has:",
+            entityNames.has(selectedText)
+          );
+
+          if (entityNames.has(selectedText)) {
+            console.log("Adding Prisma hover decoration");
+            // Add hover decoration
+            editor.deltaDecorations(
+              [],
+              [
+                {
+                  range: {
+                    startLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endLineNumber: position.lineNumber,
+                    endColumn: word.endColumn,
+                  },
+                  options: {
+                    className: "prisma-model-hover-highlight",
+                    hoverMessage: {
+                      value: `${
+                        navigator.platform.includes("Mac") ? "⌘" : "Ctrl"
+                      }+click to navigate to ${prismaToSqlName(
+                        selectedText
+                      )} table`,
+                    },
+                  },
+                },
+              ]
+            );
+          } else {
+            // Clear decorations when hovering over non-model words
+            const currentDecorations = editor.getModel()?.getAllDecorations();
+            if (currentDecorations) {
+              const modelDecorations = currentDecorations.filter(
+                (d: any) =>
+                  d.options.className === "prisma-model-hover-highlight"
+              );
+              if (modelDecorations.length > 0) {
+                editor.deltaDecorations(
+                  modelDecorations.map((d: any) => d.id),
+                  []
+                );
+              }
+            }
+          }
+        } else {
+          // Clear decorations when not hovering over a word
+          const currentDecorations = editor.getModel()?.getAllDecorations();
+          if (currentDecorations) {
+            const modelDecorations = currentDecorations.filter(
+              (d: any) => d.options.className === "prisma-model-hover-highlight"
+            );
+            if (modelDecorations.length > 0) {
+              editor.deltaDecorations(
+                modelDecorations.map((d: any) => d.id),
+                []
+              );
+            }
+          }
+        }
+      }
+    });
+
+    // Handle clicks with onMouseUp for better Monaco compatibility
+    editor.onMouseUp((e: any) => {
+      console.log(
+        "Prisma mouse up:",
+        e.event.metaKey,
+        e.event.ctrlKey,
+        e.target.position
+      );
+      if ((e.event.metaKey || e.event.ctrlKey) && e.target.position) {
+        const word = getPrismaWordAtPosition(editor, e.target.position);
+        console.log("Prisma click word:", word);
+        if (word) {
+          const selectedText = word.word;
+          // Get current content from the editor model instead of React state
+          const model = editor.getModel();
+          const currentContent = model ? model.getValue() : "";
+          const entityNames = getPrismaEntitiesFromPrisma(currentContent);
+          console.log(
+            "Prisma click entities:",
+            entityNames,
+            "selectedText:",
+            selectedText,
+            "has:",
+            entityNames.has(selectedText)
+          );
+
+          if (entityNames.has(selectedText)) {
+            console.log("Navigating to SQL table:", selectedText);
+            e.event.preventDefault();
+            e.event.stopPropagation();
+
+            // Small delay to ensure the event is processed
+            setTimeout(() => {
+              navigateToSqlTable(selectedText);
+            }, 50);
+          }
+        }
+      }
+    });
   };
 
   const convertSQLToPrisma = useCallback(
@@ -493,14 +745,14 @@ export default function Converter() {
         });
       }
     },
-    [toast],
+    [toast]
   );
 
   const debouncedConvert = useCallback(
     debounce((sql: string) => {
       convertSQLToPrisma(sql);
     }, 300), // Reduced debounce time since conversion is now instant
-    [convertSQLToPrisma],
+    [convertSQLToPrisma]
   );
 
   useEffect(() => {
@@ -527,9 +779,24 @@ export default function Converter() {
         if (sqlEditorRef.current && currentDecorationsRef.current.length > 0) {
           sqlEditorRef.current.deltaDecorations(
             currentDecorationsRef.current,
-            [],
+            []
           );
           currentDecorationsRef.current = [];
+        }
+        // Also clear Prisma editor decorations
+        if (prismaEditorRef.current) {
+          const prismaDecorations = prismaEditorRef.current
+            .getModel()
+            ?.getAllDecorations()
+            .filter(
+              (d: any) => d.options.className === "prisma-model-hover-highlight"
+            );
+          if (prismaDecorations && prismaDecorations.length > 0) {
+            prismaEditorRef.current.deltaDecorations(
+              prismaDecorations.map((d: any) => d.id),
+              []
+            );
+          }
         }
       }
     };
@@ -694,6 +961,63 @@ export default function Converter() {
     return result;
   };
 
+  // Convert Prisma name to SQL name (reverse of sqlToPrismaName)
+  const prismaToSqlName = (prismaName: string): string => {
+    // Remove quotes if present
+    const cleanName = prismaName.replace(/["`']/g, "");
+
+    // Convert PascalCase to snake_case
+    let result = cleanName.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+
+    console.log("Converting Prisma name:", prismaName, "→", result);
+
+    // List of uncountable nouns that don't get pluralized
+    const uncountableNouns = [
+      "equipment",
+      "information",
+      "data",
+      "software",
+      "hardware",
+      "furniture",
+      "luggage",
+      "baggage",
+      "mail",
+      "news",
+      "research",
+      "traffic",
+      "weather",
+      "advice",
+      "progress",
+      "work",
+      "staff",
+      "money",
+      "cash",
+      "content",
+    ];
+
+    // Pluralize for tables (improved pluralization)
+    if (!result.endsWith("s") && !uncountableNouns.includes(result)) {
+      // Check if it's likely an enum (contains common enum patterns or suffixes)
+      const isLikelyEnum =
+        /(_status|_type|_state|_category|_level|_role|_kind)$/i.test(result) ||
+        /^(status|type|state|category|level|role|kind)/i.test(result);
+
+      // Only pluralize if it's likely a table (not an enum)
+      if (!isLikelyEnum) {
+        result += "s";
+        console.log("Pluralized to:", result);
+      } else {
+        console.log("Detected as enum, not pluralizing:", result);
+      }
+    } else if (uncountableNouns.includes(result)) {
+      console.log("Uncountable noun, not pluralizing:", result);
+    } else {
+      console.log("Already ends with 's', not pluralizing:", result);
+    }
+
+    return result;
+  };
+
   // Navigate to corresponding Prisma model
   const navigateToPrismaModel = (sqlTableName: string) => {
     if (!prismaEditorRef.current) {
@@ -755,7 +1079,7 @@ export default function Converter() {
           false, // not case sensitive
           false, // not whole word
           null,
-          true, // return all matches
+          true // return all matches
         );
 
         if (matches.length > 0) {
@@ -795,12 +1119,131 @@ export default function Converter() {
           variant: "destructive",
         });
       }
-      
     } catch (error) {
       console.error("Error during navigation:", error);
       toast({
         title: "Navigation Error",
         description: "An error occurred while navigating to the model",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Navigate to corresponding SQL table from Prisma model
+  const navigateToSqlTable = (prismaModelName: string) => {
+    if (!sqlEditorRef.current) {
+      toast({
+        title: "Navigation Error",
+        description: "SQL editor not ready",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const sqlEditor = sqlEditorRef.current;
+    const model = sqlEditor.getModel();
+
+    if (!model) {
+      toast({
+        title: "Navigation Error",
+        description: "SQL editor model not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const sqlTableName = prismaToSqlName(prismaModelName);
+
+    try {
+      // Focus the SQL editor first
+      sqlEditor.focus();
+
+      console.log("Searching for SQL table:", sqlTableName);
+
+      // Try multiple search patterns to find the table or enum
+      const searchPatterns = [
+        `CREATE TABLE ${sqlTableName}`, // Try as a table first
+        `CREATE TYPE ${sqlTableName}`, // Try as an enum type
+        `CREATE TABLE \`${sqlTableName}\``, // Quoted table name
+        `CREATE TYPE \`${sqlTableName}\``, // Quoted enum name
+        `CREATE TABLE "${sqlTableName}"`, // Double quoted table name
+        `CREATE TYPE "${sqlTableName}"`, // Double quoted enum name
+        sqlTableName, // Just the entity name
+        // Also try with pluralized version as fallback
+        `CREATE TABLE ${sqlTableName}s`, // Pluralized version
+        `CREATE TABLE \`${sqlTableName}s\``, // Quoted pluralized
+        `CREATE TABLE "${sqlTableName}s"`, // Double quoted pluralized
+        // And try singular version if we had pluralized
+        sqlTableName.endsWith("s")
+          ? `CREATE TABLE ${sqlTableName.slice(0, -1)}`
+          : null,
+        sqlTableName.endsWith("s")
+          ? `CREATE TABLE \`${sqlTableName.slice(0, -1)}\``
+          : null,
+        sqlTableName.endsWith("s")
+          ? `CREATE TABLE "${sqlTableName.slice(0, -1)}"`
+          : null,
+      ].filter(Boolean); // Remove null values
+
+      console.log("Search patterns:", searchPatterns);
+
+      let matches: any[] = [];
+
+      for (const pattern of searchPatterns) {
+        console.log("Trying pattern:", pattern);
+        matches = model.findMatches(
+          pattern,
+          false, // not regex
+          false, // not case sensitive
+          false, // not whole word
+          null,
+          true // return all matches
+        );
+
+        console.log("Matches found for pattern:", pattern, "→", matches.length);
+        if (matches.length > 0) {
+          console.log("Found matches:", matches);
+          break;
+        }
+      }
+
+      if (matches.length > 0) {
+        const match = matches[0];
+        const startLine = match.range.startLineNumber;
+
+        // Simple scroll to the line
+        sqlEditor.revealLineInCenter(startLine);
+
+        // Set cursor position to the found line
+        sqlEditor.setPosition({
+          lineNumber: startLine,
+          column: 1,
+        });
+
+        // Simple selection of just the line
+        sqlEditor.setSelection({
+          startLineNumber: startLine,
+          startColumn: 1,
+          endLineNumber: startLine,
+          endColumn: model.getLineMaxColumn(startLine),
+        });
+
+        toast({
+          title: "Navigated to Table",
+          description: `Found ${sqlTableName} table in SQL schema`,
+        });
+      } else {
+        toast({
+          title: "Table Not Found",
+          description: `Could not find table ${sqlTableName} in SQL schema`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error during navigation:", error);
+      toast({
+        title: "Navigation Error",
+        description: "An error occurred while navigating to the table",
         variant: "destructive",
       });
     }
@@ -1000,16 +1443,16 @@ export default function Converter() {
                 conversionStatus === "ready"
                   ? "bg-chart-2"
                   : conversionStatus === "converting"
-                    ? "bg-chart-3 animate-pulse"
-                    : "bg-destructive"
+                  ? "bg-chart-3 animate-pulse"
+                  : "bg-destructive"
               }`}
             />
             <span data-testid="text-status">
               {conversionStatus === "ready"
                 ? "Ready"
                 : conversionStatus === "converting"
-                  ? "Converting..."
-                  : "Error"}
+                ? "Converting..."
+                : "Error"}
             </span>
           </div>
           <div data-testid="text-tables-converted">
@@ -1065,6 +1508,12 @@ export default function Converter() {
                   </kbd>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-muted rounded">
+                  <span>Navigate to SQL table</span>
+                  <kbd className="px-2 py-1 text-xs bg-background border rounded">
+                    {navigator.platform.includes("Mac") ? "⌘" : "Ctrl"} + Click
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded">
                   <span>Copy SQL content</span>
                   <kbd className="px-2 py-1 text-xs bg-background border rounded">
                     Click Copy button
@@ -1093,8 +1542,10 @@ export default function Converter() {
                 <li className="flex items-start space-x-2">
                   <span className="text-chart-2 mt-1">•</span>
                   <span>
-                    <strong>Smart navigation:</strong> Cmd/Ctrl+Click on table
-                    names in SQL to jump to corresponding Prisma models
+                    <strong>Bidirectional navigation:</strong> Cmd/Ctrl+Click on
+                    table names in SQL to jump to corresponding Prisma models,
+                    or click on model names in Prisma to jump to corresponding
+                    SQL tables
                   </span>
                 </li>
                 <li className="flex items-start space-x-2">
@@ -1189,7 +1640,7 @@ export default function Converter() {
 // Debounce utility function
 function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number,
+  wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {

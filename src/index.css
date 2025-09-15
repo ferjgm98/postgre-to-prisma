@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -26,9 +26,9 @@
   --ring: hsl(221.74, 13.14%, 34.31%);
   --chart-1: hsl(203.8863, 88.2845%, 53.1373%);
   --chart-2: hsl(159.7826, 100%, 36.0784%);
-  --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
+  --chart-3: hsl(42.029, 92.8251%, 56.2745%);
   --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
-  --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
+  --chart-5: hsl(341.4894, 75.2%, 50.9804%);
   --sidebar: hsl(45, 25%, 97%);
   --sidebar-foreground: hsl(20, 14%, 17%);
   --sidebar-primary: hsl(9, 75%, 61%);
@@ -37,18 +37,23 @@
   --sidebar-accent-foreground: hsl(20, 14%, 17%);
   --sidebar-border: hsl(45, 15%, 80%);
   --sidebar-ring: hsl(9, 75%, 61%);
-  --font-sans: 'Inter', sans-serif;
-  --font-serif: 'Inter', sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Inter", sans-serif;
   --font-mono: Menlo, monospace;
   --radius: 0.4rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 1px 2px -1px hsl(9, 75%, 61% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 1px 2px -1px hsl(9, 75%, 61% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 2px 4px -1px hsl(9, 75%, 61% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 4px 6px -1px hsl(9, 75%, 61% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00), 0px 8px 10px -1px hsl(9, 75%, 61% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
+  --shadow-2xs: 0px 2px 0px 0px hsl(9, 75%, 61% / 0);
+  --shadow-xs: 0px 2px 0px 0px hsl(9, 75%, 61% / 0);
+  --shadow-sm: 0px 2px 0px 0px hsl(9, 75%, 61% / 0),
+    0px 1px 2px -1px hsl(9, 75%, 61% / 0);
+  --shadow: 0px 2px 0px 0px hsl(9, 75%, 61% / 0),
+    0px 1px 2px -1px hsl(9, 75%, 61% / 0);
+  --shadow-md: 0px 2px 0px 0px hsl(9, 75%, 61% / 0),
+    0px 2px 4px -1px hsl(9, 75%, 61% / 0);
+  --shadow-lg: 0px 2px 0px 0px hsl(9, 75%, 61% / 0),
+    0px 4px 6px -1px hsl(9, 75%, 61% / 0);
+  --shadow-xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0),
+    0px 8px 10px -1px hsl(9, 75%, 61% / 0);
+  --shadow-2xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 }
@@ -75,9 +80,9 @@
   --ring: hsl(9, 75%, 61%);
   --chart-1: hsl(203.8863, 88.2845%, 53.1373%);
   --chart-2: hsl(159.7826, 100%, 36.0784%);
-  --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
+  --chart-3: hsl(42.029, 92.8251%, 56.2745%);
   --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
-  --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
+  --chart-5: hsl(341.4894, 75.2%, 50.9804%);
   --sidebar: hsl(20, 14%, 8%);
   --sidebar-foreground: hsl(45, 25%, 85%);
   --sidebar-primary: hsl(9, 75%, 61%);
@@ -86,18 +91,23 @@
   --sidebar-accent-foreground: hsl(45, 25%, 85%);
   --sidebar-border: hsl(20, 14%, 15%);
   --sidebar-ring: hsl(9, 75%, 61%);
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: "Inter", sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+  --font-mono: "JetBrains Mono", "Menlo", monospace;
   --radius: 0.4rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(9 75% 61% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(9 75% 61% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(9 75% 61% / 0.00), 0px 1px 2px -1px hsl(9 75% 61% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(9 75% 61% / 0.00), 0px 1px 2px -1px hsl(9 75% 61% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(9 75% 61% / 0.00), 0px 2px 4px -1px hsl(9 75% 61% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(9 75% 61% / 0.00), 0px 4px 6px -1px hsl(9 75% 61% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(9 75% 61% / 0.00), 0px 8px 10px -1px hsl(9 75% 61% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(9 75% 61% / 0.00);
+  --shadow-2xs: 0px 2px 0px 0px hsl(9 75% 61% / 0);
+  --shadow-xs: 0px 2px 0px 0px hsl(9 75% 61% / 0);
+  --shadow-sm: 0px 2px 0px 0px hsl(9 75% 61% / 0),
+    0px 1px 2px -1px hsl(9 75% 61% / 0);
+  --shadow: 0px 2px 0px 0px hsl(9 75% 61% / 0),
+    0px 1px 2px -1px hsl(9 75% 61% / 0);
+  --shadow-md: 0px 2px 0px 0px hsl(9 75% 61% / 0),
+    0px 2px 4px -1px hsl(9 75% 61% / 0);
+  --shadow-lg: 0px 2px 0px 0px hsl(9 75% 61% / 0),
+    0px 4px 6px -1px hsl(9 75% 61% / 0);
+  --shadow-xl: 0px 2px 0px 0px hsl(9 75% 61% / 0),
+    0px 8px 10px -1px hsl(9 75% 61% / 0);
+  --shadow-2xl: 0px 2px 0px 0px hsl(9 75% 61% / 0);
 }
 
 @layer base {
@@ -115,18 +125,46 @@
 }
 
 /* Syntax highlighting styles */
-.sql-keyword { color: var(--chart-1); font-weight: 500; }
-.sql-string { color: var(--chart-2); }
-.sql-number { color: var(--chart-3); }
-.sql-type { color: var(--chart-4); font-weight: 500; }
-.sql-identifier { color: var(--chart-5); }
-.sql-comment { color: var(--muted-foreground); font-style: italic; }
+.sql-keyword {
+  color: var(--chart-1);
+  font-weight: 500;
+}
+.sql-string {
+  color: var(--chart-2);
+}
+.sql-number {
+  color: var(--chart-3);
+}
+.sql-type {
+  color: var(--chart-4);
+  font-weight: 500;
+}
+.sql-identifier {
+  color: var(--chart-5);
+}
+.sql-comment {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
 
-.prisma-keyword { color: var(--chart-1); font-weight: 500; }
-.prisma-type { color: var(--chart-4); font-weight: 500; }
-.prisma-decorator { color: var(--chart-5); }
-.prisma-string { color: var(--chart-2); }
-.prisma-comment { color: var(--muted-foreground); font-style: italic; }
+.prisma-keyword {
+  color: var(--chart-1);
+  font-weight: 500;
+}
+.prisma-type {
+  color: var(--chart-4);
+  font-weight: 500;
+}
+.prisma-decorator {
+  color: var(--chart-5);
+}
+.prisma-string {
+  color: var(--chart-2);
+}
+.prisma-comment {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
 
 .editor-container {
   height: calc(100vh - 96px);
@@ -158,7 +196,6 @@
 
 /* Removed .line-numbers class - Monaco Editor handles this internally */
 
-
 .syntax-highlighted {
   font-family: var(--font-mono);
   font-size: 14px;
@@ -174,9 +211,15 @@
 }
 
 @keyframes highlight-flash {
-  0% { opacity: 0.4; }
-  50% { opacity: 0.2; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .table-hover-highlight {
@@ -202,4 +245,21 @@
   text-decoration: underline !important;
   cursor: pointer !important;
   border-bottom: 2px solid var(--chart-1) !important;
+}
+
+.prisma-model-hover-highlight {
+  background-color: var(--chart-4) !important;
+  opacity: 0.3 !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  border-bottom: 2px solid var(--chart-4) !important;
+}
+
+/* Make sure Monaco decorations work for Prisma */
+.monaco-editor .prisma-model-hover-highlight {
+  background-color: var(--chart-4) !important;
+  opacity: 0.3 !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  border-bottom: 2px solid var(--chart-4) !important;
 }
