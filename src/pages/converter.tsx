@@ -551,7 +551,7 @@ export default function Converter() {
   };
 
   // Handle Prisma editor mount
-  const handlePrismaEditorMount = (editor: any, monaco: any) => {
+  const handlePrismaEditorMount = (editor: any, _monaco: any) => {
     prismaEditorRef.current = editor;
 
     // Handle mouse move for hover effects
